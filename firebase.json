@@ -1,0 +1,22 @@
+{
+    "firestore": {
+        "indexes": "firestore.indexes.json",
+        "rules": "firestore.rules"
+    },
+    "functions": [
+        {
+            "codebase": "default",
+            "ignore": [
+                "node_modules",
+                ".git",
+                "firebase-debug.log",
+                "firebase-debug.*.log"
+            ],
+            "predeploy": [
+                "NODE_PATH=/usr/local/bin/node-link pnpm --prefix \"$RESOURCE_DIR\" run lint",
+                "NODE_PATH=/usr/local/bin/node-link pnpm --prefix \"$RESOURCE_DIR\" run build"
+            ],            
+            "source": "functions"
+        }
+    ]
+}
