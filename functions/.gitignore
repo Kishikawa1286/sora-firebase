@@ -1,3 +1,7 @@
+# Environmental Variables
+
+.env.dev
+
 # Compiled JavaScript files
 lib/**/*.js
 lib/**/*.js.map

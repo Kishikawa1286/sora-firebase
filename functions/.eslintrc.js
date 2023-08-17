@@ -30,5 +30,6 @@ module.exports = {
     "indent": ["error", 2],
     "object-curly-spacing": 0, // Disable conflicting rule
     "camelcase": 0,
+    "quote-props": 0,
   },
 };
