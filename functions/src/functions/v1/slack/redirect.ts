@@ -1,6 +1,6 @@
-import { setSlackToken } from "../../utils/firestore/slack-token";
-import { functions128MB } from "../../utils/functions";
-import { fetchSlackAccessToken } from "../../utils/slack/fetch-access-token";
+import { setSlackToken } from "../../../utils/firestore/slack-token";
+import { functions128MB } from "../../../utils/functions";
+import { fetchSlackAccessToken } from "../../../utils/slack/fetch-access-token";
 
 export const slackRedirect = functions128MB.https.onRequest(
   async (req, res) => {

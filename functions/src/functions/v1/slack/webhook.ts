@@ -1,10 +1,10 @@
 import {
   getSlackToken,
   refreshSlackToken,
-} from "../../utils/firestore/slack-token";
-import { functions256MB } from "../../utils/functions";
-import { refreshToken } from "../../utils/slack/refresh-token";
-import { replyToSlackThread } from "../../utils/slack/reply-to-thread";
+} from "../../../utils/firestore/slack-token";
+import { functions256MB } from "../../../utils/functions";
+import { refreshToken } from "../../../utils/slack/refresh-token";
+import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 
 type SlackEvent = {
   client_msg_id: string;
