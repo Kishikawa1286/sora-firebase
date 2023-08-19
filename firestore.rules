@@ -6,8 +6,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    match /slack_tokens_v1/{token} {
-      allow read, write: if false;
+    match /users_v1/{userId}/{document=**} {
+      allow read: if request.auth.uid == userId;
+      allow write: if false;
     }
   }
 }
