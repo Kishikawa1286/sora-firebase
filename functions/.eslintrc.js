@@ -32,9 +32,9 @@ module.exports = {
     "camelcase": 0,
     "quote-props": 0,
     "max-len": ["error", {
-      "code": 80,
-      "ignorePattern": "^(import|export) [^]+ from [^]+;$",
-      "ignoreUrls": true,
+      code: 80,
+      ignoreStrings: true,
+      ignoreTemplateLiterals: true,
     }],
   },
 };

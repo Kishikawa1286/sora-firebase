@@ -24,14 +24,44 @@ type Message = {
   message: string;
   summary: string;
   bot_message: string;
-  replied: boolean;
+  reply: string;
   sender_id: string;
   sender_name: string;
   sender_icon_url: string;
   image_urls: string[];
   file_attached: boolean;
+  replied: boolean;
+  archived: boolean;
+  read: boolean;
   created_at: Timestamp;
   last_updated_at: Timestamp;
+};
+
+const isMessage = (data: unknown): data is Message => {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const message = data as Message;
+  return (
+    typeof message.id === "string" &&
+    typeof message.user_id === "string" &&
+    typeof message.type === "string" &&
+    typeof message.message === "string" &&
+    typeof message.summary === "string" &&
+    typeof message.bot_message === "string" &&
+    typeof message.reply === "string" &&
+    typeof message.sender_id === "string" &&
+    typeof message.sender_name === "string" &&
+    typeof message.sender_icon_url === "string" &&
+    message.image_urls instanceof Array &&
+    message.image_urls.every((url) => typeof url === "string") &&
+    typeof message.file_attached === "boolean" &&
+    typeof message.replied === "boolean" &&
+    typeof message.archived === "boolean" &&
+    typeof message.read === "boolean" &&
+    message.created_at instanceof Timestamp &&
+    message.last_updated_at instanceof Timestamp
+  );
 };
 
 type SlackMessage = {
@@ -85,6 +115,44 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
   );
 };
 
+export const getMessage = async (
+  userId: string,
+  messageId: string
+): Promise<Message | null> => {
+  const snapshot = await firestore
+    .doc(messageDocument(userId, messageId))
+    .get();
+  if (!snapshot.exists) {
+    return null;
+  }
+  const data = snapshot.data();
+  if (!isMessage(data)) {
+    return null;
+  }
+  return data;
+};
+
+export const onReply = async ({
+  userId,
+  messageId,
+  reply,
+}: {
+  userId: string;
+  messageId: string;
+  reply: string;
+}): Promise<void> => {
+  const messageRef = firestore.doc(messageDocument(userId, messageId));
+  const messageDoc = await messageRef.get();
+  if (!messageDoc.exists) {
+    throw new Error("Message not found");
+  }
+  await messageRef.update({
+    reply,
+    replied: true,
+    last_updated_at: Timestamp.now(),
+  });
+};
+
 export const createSlackMessage = async ({
   userId,
   message,
@@ -127,12 +195,15 @@ export const createSlackMessage = async ({
     message,
     summary,
     bot_message: botMessage,
-    replied: false,
+    reply: "",
     sender_id: senderId,
     sender_name: senderName,
     sender_icon_url: senderIconUrl,
     image_urls: imageUrls ?? [],
     file_attached: fileAttached ?? false,
+    replied: false,
+    archived: false,
+    read: false,
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now(),
   };

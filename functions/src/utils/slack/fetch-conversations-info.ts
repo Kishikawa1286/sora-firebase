@@ -10,3 +10,11 @@ export const fetchConversationsInfo = async (
   });
   return data;
 };
+
+export const fetchChannelName = async (
+  accessToken: string,
+  channelId: string
+): Promise<string | null> => {
+  const response = await fetchConversationsInfo(accessToken, channelId);
+  return response.channel?.name ?? null;
+};

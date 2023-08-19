@@ -44,7 +44,7 @@ const isSlackToken = (data: unknown): data is SlackToken => {
   );
 };
 
-type VerifiedSlackUser = {
+export type VerifiedSlackUser = {
   id: string; // Firebase user ID
   slack_user_id: string;
   team_id: string;
