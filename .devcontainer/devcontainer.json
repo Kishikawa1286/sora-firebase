@@ -48,7 +48,6 @@
             },
             "extensions": [
                 "dbaeumer.vscode-eslint",
-                "esbenp.prettier-vscode",
                 "christian-kohler.npm-intellisense",
                 "unional.vscode-sort-package-json"
             ]
