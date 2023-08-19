@@ -1,4 +1,4 @@
-import axios from "axios";
+import { WebClient } from "@slack/web-api";
 
 export const replyToSlackThread = async ({
   accessToken,
@@ -11,27 +11,21 @@ export const replyToSlackThread = async ({
   threadTimestamp: string;
   text: string;
 }): Promise<void> => {
-  try {
-    const response = await axios.post(
-      "https://slack.com/api/chat.postMessage",
-      {
-        channel: channel,
-        text: text,
-        thread_ts: threadTimestamp,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  const web = new WebClient(accessToken);
 
-    if (response.data.ok) {
-      console.log("Message sent successfully:", response.data);
+  try {
+    const response = await web.chat.postMessage({
+      channel: channel,
+      text: text,
+      thread_ts: threadTimestamp,
+    });
+
+    if (!response.ok) {
+      console.error("Error sending message:", response.error);
       return;
     }
-    console.error("Error sending message:", response.data.error);
+
+    console.log("Message sent successfully:", response);
   } catch (error) {
     console.error("Error sending message to Slack:", error);
   }

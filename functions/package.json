@@ -13,6 +13,7 @@
         "start": "npm run shell"
     },
     "dependencies": {
+        "@slack/events-api": "3.0.1",
         "axios": "1.4.0",
         "firebase-admin": "11.10.1",
         "firebase-functions": "4.4.1"

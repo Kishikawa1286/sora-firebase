@@ -11,11 +11,8 @@ import {
   searchSlackVerificationCodeByCode,
 } from "../../../utils/firestore/slack-verification-code";
 import { functions256MB } from "../../../utils/functions";
-import {
-  fetchPrivateChannelInfo,
-  fetchPublicChannelInfo,
-} from "../../../utils/slack/fetch-channel-info";
-import { fetchUserInfo } from "../../../utils/slack/fetch-user-info";
+import { fetchConversationsInfo } from "../../../utils/slack/fetch-conversations-info";
+import { fetchUserInfo } from "../../../utils/slack/fetch-users-info";
 import { refreshToken } from "../../../utils/slack/refresh-token";
 import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 
@@ -124,27 +121,11 @@ const handleDirectMessage = async (
 };
 
 const getChannelName = async (
-  event: SlackEvent,
-  accessToken: string
-): Promise<string> => {
-  if (event.channel_type === "channel") {
-    const publicChannelInfo = await fetchPublicChannelInfo(
-      accessToken,
-      event.channel
-    );
-    if (publicChannelInfo.ok) {
-      return publicChannelInfo.channel.name;
-    }
-  } else if (event.channel_type === "group") {
-    const privateChannelInfo = await fetchPrivateChannelInfo(
-      accessToken,
-      event.channel
-    );
-    if (privateChannelInfo.ok) {
-      return privateChannelInfo.channel.id;
-    }
-  }
-  throw new Error("Failed to fetch channel info");
+  accessToken: string,
+  channelId: string
+): Promise<string | null> => {
+  const response = await fetchConversationsInfo(accessToken, channelId);
+  return response.channel?.name ?? null;
 };
 
 const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
@@ -165,12 +146,27 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
     throw new Error("Failed to fetch Slack user info");
   }
 
-  const senderId = slackUserInfo.user.id;
-  const senderName = slackUserInfo.user.real_name;
-  const slackTeamId = slackUserInfo.user.team_id;
-  const slackEmail = slackUserInfo.user.profile.email;
+  const senderId = slackUserInfo.user?.id;
+  const senderName = slackUserInfo.user?.real_name;
+  const slackTeamId = slackUserInfo.user?.team_id;
+  const slackEmail = slackUserInfo.user?.profile?.email;
+  const senderIconUrl = slackUserInfo.user?.profile?.image_original;
 
-  const channelName = await getChannelName(event, accessToken);
+  if (
+    !senderId ||
+    !senderName ||
+    !slackTeamId ||
+    !slackEmail ||
+    !senderIconUrl
+  ) {
+    throw new Error("Missing data from Slack user info");
+  }
+
+  const channelName = await getChannelName(accessToken, event.channel);
+
+  if (!channelName) {
+    throw new Error("Missing channel name");
+  }
 
   // Create a Message Document in Firestore
   await createSlackMessage({
@@ -180,7 +176,7 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
     botMessage: "", // TODO: This bot message also needs to be set appropriately
     senderId,
     senderName,
-    senderIconUrl: slackUserInfo.user.profile.image_original,
+    senderIconUrl,
     slackTeamId,
     slackUserId: event.user,
     slackSenderUserId: event.user,

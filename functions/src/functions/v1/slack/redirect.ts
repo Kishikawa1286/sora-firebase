@@ -12,14 +12,22 @@ export const slackRedirect = functions128MB.https.onRequest(
     }
 
     try {
-      // Retrieve access token via Slack API
       const data = await fetchSlackAccessToken(code);
 
-      const { teamId, accessToken, botUserId, expiresInSeconds, refreshToken } =
-        data;
+      const accessToken = data.access_token;
+      const expiresInSeconds = data.expires_in;
+      const refreshToken = data.refresh_token;
+      const botUserId = data.bot_user_id;
+      const teamId = data.team?.id;
 
-      if (!expiresInSeconds || !refreshToken) {
-        res.status(500).send("Error: Missing data for token rotation");
+      if (
+        !accessToken ||
+        !expiresInSeconds ||
+        !refreshToken ||
+        !botUserId ||
+        !teamId
+      ) {
+        res.status(500).send("Error: Missing data from Slack API");
         return;
       }
 
