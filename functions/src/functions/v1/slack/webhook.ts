@@ -1,5 +1,8 @@
+import { createSlackMessage } from "../../../utils/firestore/message";
+import { createSlackSender } from "../../../utils/firestore/sender";
 import {
   getSlackToken,
+  getVerifiedSlackUser,
   refreshSlackToken,
   setVerifiedSlackUser,
 } from "../../../utils/firestore/slack-token";
@@ -8,20 +11,27 @@ import {
   searchSlackVerificationCodeByCode,
 } from "../../../utils/firestore/slack-verification-code";
 import { functions256MB } from "../../../utils/functions";
+import {
+  fetchPrivateChannelInfo,
+  fetchPublicChannelInfo,
+} from "../../../utils/slack/fetch-channel-info";
+import { fetchUserInfo } from "../../../utils/slack/fetch-user-info";
 import { refreshToken } from "../../../utils/slack/refresh-token";
 import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 
+type SlackBlock = Record<string, unknown>;
+
 type SlackEvent = {
   client_msg_id: string;
-  type: string;
+  type: "message";
   text: string;
   user: string;
   ts: string;
-  blocks: unknown[];
+  blocks: SlackBlock[];
   team: string;
   channel: string;
   event_ts: string;
-  channel_type: string;
+  channel_type: "channel" | "group" | "im" | "mpim";
 };
 
 type SlackAuthorization = {
@@ -39,7 +49,7 @@ type SlackWebhookRequestBody = {
   context_enterprise_id: null | string;
   api_app_id: string;
   event: SlackEvent;
-  type: string;
+  type: "message";
   event_id: string;
   event_time: number;
   authorizations: SlackAuthorization[];
@@ -113,6 +123,83 @@ const handleDirectMessage = async (
   });
 };
 
+const getChannelName = async (
+  event: SlackEvent,
+  accessToken: string
+): Promise<string> => {
+  if (event.channel_type === "channel") {
+    const publicChannelInfo = await fetchPublicChannelInfo(
+      accessToken,
+      event.channel
+    );
+    if (publicChannelInfo.ok) {
+      return publicChannelInfo.channel.name;
+    }
+  } else if (event.channel_type === "group") {
+    const privateChannelInfo = await fetchPrivateChannelInfo(
+      accessToken,
+      event.channel
+    );
+    if (privateChannelInfo.ok) {
+      return privateChannelInfo.channel.id;
+    }
+  }
+  throw new Error("Failed to fetch channel info");
+};
+
+const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
+  // Throw an error if it's a direct message
+  if (event.channel_type === "im") {
+    throw new Error("Direct messages are not supported.");
+  }
+
+  const verifiedUser = await getVerifiedSlackUser(event.team, event.user);
+  if (!verifiedUser) {
+    throw new Error("User is not verified.");
+  }
+
+  const userId = verifiedUser.id;
+
+  const slackUserInfo = await fetchUserInfo(accessToken, event.user);
+  if (!slackUserInfo.ok) {
+    throw new Error("Failed to fetch Slack user info");
+  }
+
+  const senderId = slackUserInfo.user.id;
+  const senderName = slackUserInfo.user.real_name;
+  const slackTeamId = slackUserInfo.user.team_id;
+  const slackEmail = slackUserInfo.user.profile.email;
+
+  const channelName = await getChannelName(event, accessToken);
+
+  // Create a Message Document in Firestore
+  await createSlackMessage({
+    userId,
+    message: event.text,
+    summary: "", // TODO: This summary needs to be set appropriately
+    botMessage: "", // TODO: This bot message also needs to be set appropriately
+    senderId,
+    senderName,
+    senderIconUrl: slackUserInfo.user.profile.image_original,
+    slackTeamId,
+    slackUserId: event.user,
+    slackSenderUserId: event.user,
+    slackChannelId: event.channel,
+    slackChannelName: channelName,
+    slackThreadTs: event.ts,
+  });
+
+  // Create a Sender Document in Firestore
+  await createSlackSender({
+    userId,
+    id: senderId,
+    senderId,
+    senderName,
+    slackTeamId,
+    slackEmail,
+  });
+};
+
 export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
     // Handling URL verification
@@ -131,12 +218,7 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
     if (body.event.channel_type === "im") {
       await handleDirectMessage(accessToken, body);
     } else {
-      await replyToSlackThread({
-        accessToken,
-        channel: body.event.channel,
-        threadTimestamp: body.event.ts,
-        text: "I received a message in a channel.",
-      });
+      await handleChannelMessage(accessToken, body.event);
     }
 
     res.status(200).send("Success");

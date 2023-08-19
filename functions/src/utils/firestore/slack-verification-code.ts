@@ -2,7 +2,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
 import { randomString } from "../random-string";
 
-const slackVerificationCodesCollection = "slack_verification_code_v1";
+const slackVerificationCodesCollection = "slack_verification_codes_v1";
 const slackVerificationCodeDocument = (id: string) =>
   `${slackVerificationCodesCollection}/${id}`;
 
@@ -37,7 +37,7 @@ const isSlackVerificationCode = (
 export const createSlackVerificationCode = async (
   appUserId: string
 ): Promise<SlackVerificationCode> => {
-  const id = randomString(32);
+  const id = randomString(20);
   const code = randomString(16);
   // Expires in 24 hours
   const expiresAt = Timestamp.fromMillis(Date.now() + 1000 * 60 * 60 * 24);
