@@ -1,7 +1,12 @@
 import {
   getSlackToken,
   refreshSlackToken,
+  setVerifiedSlackUser,
 } from "../../../utils/firestore/slack-token";
+import {
+  deleteSlackVerificationCode,
+  searchSlackVerificationCodeByCode,
+} from "../../../utils/firestore/slack-verification-code";
 import { functions256MB } from "../../../utils/functions";
 import { refreshToken } from "../../../utils/slack/refresh-token";
 import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
@@ -42,6 +47,72 @@ type SlackWebhookRequestBody = {
   event_context: string;
 };
 
+const getRefreshedAccessToken = async (teamId: string): Promise<string> => {
+  const tokenData = await getSlackToken(teamId);
+
+  // Check if the token expiration time is less than 15 minutes
+  const now = new Date();
+  // Calculate time left in seconds
+  const timeLeft =
+    (tokenData.expires_at.toDate().getTime() - now.getTime()) / 1000;
+
+  // If the token is valid for more than 15 minutes, return the token
+  if (timeLeft > 15 * 60) {
+    return tokenData.access_token;
+  }
+
+  const refreshedData = await refreshToken(tokenData.refresh_token);
+
+  const refreshedAccessToken = refreshedData.access_token;
+  const refreshedRefreshToken = refreshedData.refresh_token;
+  const refreshedExpiresInSeconds = refreshedData.expires_in;
+
+  // These variables are normally not undefined, but check them for linter
+  if (!refreshedRefreshToken || !refreshedExpiresInSeconds) {
+    throw new Error("Missing data for token rotation");
+  }
+
+  await refreshSlackToken({
+    teamId: teamId,
+    accessToken: refreshedAccessToken,
+    expiresInSeconds: refreshedExpiresInSeconds,
+    refreshToken: refreshedRefreshToken,
+  });
+
+  return refreshedAccessToken;
+};
+
+const handleDirectMessage = async (
+  accessToken: string,
+  body: SlackWebhookRequestBody
+): Promise<void> => {
+  const { text } = body.event;
+  const verificationCodeData = await searchSlackVerificationCodeByCode(text);
+  const isCodeExists = verificationCodeData !== undefined;
+
+  if (!isCodeExists) {
+    await replyToSlackThread({
+      accessToken,
+      channel: body.event.channel,
+      threadTimestamp: body.event.ts,
+      text: "Invalid verification code.",
+    });
+
+    return;
+  }
+
+  await setVerifiedSlackUser(body.team_id, verificationCodeData.app_user_id);
+
+  await deleteSlackVerificationCode(verificationCodeData.id);
+
+  await replyToSlackThread({
+    accessToken,
+    channel: body.event.channel,
+    threadTimestamp: body.event.ts,
+    text: "Verification code is valid.",
+  });
+};
+
 export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
     // Handling URL verification
@@ -54,56 +125,18 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
 
     const teamId = body.team_id; // Retrieve teamId from the Slack request
 
-    if (!teamId) {
-      res.status(400).send("Error: Missing team_id");
-      return;
-    }
+    // Refresh if expired
+    const accessToken = await getRefreshedAccessToken(teamId);
 
-    const tokenData = await getSlackToken(teamId);
-
-    // Check if the token expiration time is less than 15 minutes
-    const now = new Date();
-    // Calculate time left in seconds
-    const timeLeft =
-      (tokenData.expires_at.toDate().getTime() - now.getTime()) / 1000;
-
-    if (timeLeft <= 15 * 60) {
-      // 15 minutes in seconds
-      const refreshedData = await refreshToken(tokenData.refresh_token);
-
-      const refreshedAccessToken = refreshedData.access_token;
-      const refreshedRefreshToken = refreshedData.refresh_token;
-      const refreshedExpiresInSeconds = refreshedData.expires_in;
-
-      if (!refreshedRefreshToken || !refreshedExpiresInSeconds) {
-        res.status(500).send("Error: Missing data for token rotation");
-        return;
-      }
-
-      await refreshSlackToken({
-        teamId: teamId,
-        accessToken: refreshedAccessToken,
-        expiresInSeconds: refreshedExpiresInSeconds,
-        refreshToken: refreshedRefreshToken,
-      });
-
-      if (body.event.user !== tokenData.bot_user_id) {
-        await replyToSlackThread({
-          accessToken: refreshedAccessToken,
-          channel: body.event.channel,
-          threadTimestamp: body.event.ts,
-          text: "Token refreshed",
-        });
-      }
+    if (body.event.channel_type === "im") {
+      await handleDirectMessage(accessToken, body);
     } else {
-      if (body.event.user !== tokenData.bot_user_id) {
-        await replyToSlackThread({
-          accessToken: tokenData.access_token,
-          channel: body.event.channel,
-          threadTimestamp: body.event.ts,
-          text: "Token is still valid",
-        });
-      }
+      await replyToSlackThread({
+        accessToken,
+        channel: body.event.channel,
+        threadTimestamp: body.event.ts,
+        text: "I received a message in a channel.",
+      });
     }
 
     res.status(200).send("Success");

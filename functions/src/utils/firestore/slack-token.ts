@@ -4,6 +4,10 @@ import { firestore } from "../admin";
 const slackTokensCollection = "slack_tokens_v1";
 const slackTokenDocument = (teamId: string) =>
   `${slackTokensCollection}/${teamId}`;
+const verifiedSlackUsersCollection = (teamId: string) =>
+  `${slackTokenDocument(teamId)}/verified_slack_users_v1`;
+const verifiedSlackUserDocument = (teamId: string, userId: string) =>
+  `${verifiedSlackUsersCollection(teamId)}/${userId}`;
 
 const expirationDate = (expiresInSeconds: number): Date => {
   const expirationDate = new Date();
@@ -32,8 +36,8 @@ export const setSlackToken = async ({
     expires_at: Timestamp.fromDate(expiresAt),
     bot_user_id: botUserId,
     subscribing_user_ids: [],
-    created_at: Timestamp.fromDate(new Date()),
-    last_updated_at: Timestamp.fromDate(new Date()),
+    created_at: Timestamp.now(),
+    last_updated_at: Timestamp.now(),
   };
   await firestore.doc(slackTokenDocument(teamId)).set(slackToken);
 };
@@ -54,7 +58,7 @@ export const refreshSlackToken = async ({
     access_token: accessToken,
     refresh_token: refreshToken,
     expires_at: expiresAt,
-    last_updated_at: new Date(),
+    last_updated_at: Timestamp.now(),
   });
 };
 
@@ -94,4 +98,67 @@ export const getSlackToken = async (teamId: string): Promise<SlackToken> => {
     throw new Error("Invalid Slack token");
   }
   return data;
+};
+
+type VerifiedSlackUser = {
+  id: string; // App user ID
+  slack_user_id: string;
+  team_id: string;
+  created_at: Timestamp;
+  last_updated_at: Timestamp;
+};
+
+const isVerifiedSlackUser = (data: unknown): data is VerifiedSlackUser => {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const verifiedSlackUser = data as VerifiedSlackUser;
+  return (
+    typeof verifiedSlackUser.id === "string" &&
+    typeof verifiedSlackUser.slack_user_id === "string" &&
+    typeof verifiedSlackUser.team_id === "string" &&
+    verifiedSlackUser.created_at instanceof Timestamp &&
+    verifiedSlackUser.last_updated_at instanceof Timestamp
+  );
+};
+
+export const setVerifiedSlackUser = async (
+  teamId: string,
+  userId: string // App user ID
+): Promise<void> => {
+  const verifiedSlackUser: VerifiedSlackUser = {
+    id: userId,
+    slack_user_id: userId,
+    team_id: teamId,
+    created_at: Timestamp.now(),
+    last_updated_at: Timestamp.now(),
+  };
+  await firestore
+    .doc(verifiedSlackUserDocument(teamId, userId))
+    .set(verifiedSlackUser);
+};
+
+export const getVerifiedSlackUser = async (
+  teamId: string,
+  slackUserId: string
+): Promise<VerifiedSlackUser> => {
+  const document = await firestore
+    .collection(verifiedSlackUsersCollection(teamId))
+    .where("slack_user_id", "==", slackUserId)
+    .get();
+  if (document.empty) {
+    throw new Error("Verified Slack user not found");
+  }
+  const data = document.docs[0].data();
+  if (!isVerifiedSlackUser(data)) {
+    throw new Error("Invalid verified Slack user");
+  }
+  return data;
+};
+
+export const deleteVerifiedSlackUser = async (
+  teamId: string,
+  userId: string // App user ID
+): Promise<void> => {
+  await firestore.doc(verifiedSlackUserDocument(teamId, userId)).delete();
 };

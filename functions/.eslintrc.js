@@ -31,5 +31,10 @@ module.exports = {
     "object-curly-spacing": 0, // Disable conflicting rule
     "camelcase": 0,
     "quote-props": 0,
+    "max-len": ["error", {
+      "code": 80,
+      "ignorePattern": "^(import|export) [^]+ from [^]+;$",
+      "ignoreUrls": true,
+    }],
   },
 };
