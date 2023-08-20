@@ -35,6 +35,7 @@ module.exports = {
       code: 80,
       ignoreStrings: true,
       ignoreTemplateLiterals: true,
+      ignoreComments: true,
     }],
   },
 };
