@@ -9,7 +9,7 @@ export const fetchSlackAccessToken = async (
   const data = await web.oauth.v2.access({
     client_id: SLACK_CLIENT_ID,
     client_secret: SLACK_CLIENT_SECRET,
-    code: code,
+    code: code
   });
 
   if (!data.ok) {

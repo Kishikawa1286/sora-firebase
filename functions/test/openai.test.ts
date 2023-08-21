@@ -4,12 +4,12 @@ import { CompletionCreateParams, singleCompletion } from "../src/utils/openai/op
 describe("singleCompletion function", () => {
   it("should return assistant's response and be of type string", async () => {
     const params: CompletionCreateParams = {
-      max_tokens: 50,
+      max_tokens: 50
     };
 
     const response = await singleCompletion({
       userMessage: "Hello, OpenAI!",
-      params,
+      params
     });
 
     console.log("Returned value:", response);

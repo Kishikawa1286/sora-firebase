@@ -135,7 +135,7 @@ export const getMessage = async (
 export const onReply = async ({
   userId,
   messageId,
-  reply,
+  reply
 }: {
   userId: string;
   messageId: string;
@@ -149,7 +149,7 @@ export const onReply = async ({
   await messageRef.update({
     reply,
     replied: true,
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   });
 };
 
@@ -168,7 +168,7 @@ export const createSlackMessage = async ({
   slackSenderUserId,
   slackChannelId,
   slackChannelName,
-  slackThreadTs,
+  slackThreadTs
 }: {
   userId: string;
   message: string;
@@ -205,7 +205,7 @@ export const createSlackMessage = async ({
     archived: false,
     read: false,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   const slackMessage: SlackMessage = {
     id,
@@ -226,7 +226,7 @@ export const createSlackMessage = async ({
     slack_channel_name: slackChannelName,
     slack_thread_ts: slackThreadTs,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore.doc(messageDocument(userId, messageId)).create(messageData);
   await firestore

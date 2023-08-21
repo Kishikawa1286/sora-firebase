@@ -1,6 +1,6 @@
 import {
   getSlackToken,
-  refreshSlackToken,
+  refreshSlackToken
 } from "../../../utils/firestore/slack-token";
 import { refreshToken } from "../../../utils/slack/refresh-token";
 
@@ -35,7 +35,7 @@ export const getRefreshedAccessToken = async (
     teamId: teamId,
     accessToken: refreshedAccessToken,
     expiresInSeconds: refreshedExpiresInSeconds,
-    refreshToken: refreshedRefreshToken,
+    refreshToken: refreshedRefreshToken
   });
 
   return refreshedAccessToken;

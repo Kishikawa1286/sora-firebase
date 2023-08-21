@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   env: {
     es6: true,
-    node: true,
+    node: true
   },
   extends: [
     "eslint:recommended",
@@ -10,19 +10,19 @@ module.exports = {
     "plugin:import/warnings",
     "plugin:import/typescript",
     "google",
-    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: ["tsconfig.json", "tsconfig.dev.json"],
-    sourceType: "module",
+    sourceType: "module"
   },
   ignorePatterns: [
-    "/lib/**/*", // Ignore built files.
+    "/lib/**/*" // Ignore built files.
   ],
   plugins: [
     "@typescript-eslint",
-    "import",
+    "import"
   ],
   rules: {
     "quotes": ["error", "double"],
@@ -35,7 +35,8 @@ module.exports = {
       code: 80,
       ignoreStrings: true,
       ignoreTemplateLiterals: true,
-      ignoreComments: true,
+      ignoreComments: true
     }],
-  },
+    "comma-dangle": ["error", "never"]
+  }
 };

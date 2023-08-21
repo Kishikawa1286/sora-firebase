@@ -71,7 +71,7 @@ export const setSlackToken = async ({
   refreshToken,
   teamId,
   expiresInSeconds,
-  botUserId,
+  botUserId
 }: {
   accessToken: string;
   refreshToken: string;
@@ -88,7 +88,7 @@ export const setSlackToken = async ({
     bot_user_id: botUserId,
     subscribing_user_ids: [],
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore.doc(slackTokenDocument(teamId)).set(slackToken);
 };
@@ -97,7 +97,7 @@ export const refreshSlackToken = async ({
   accessToken,
   refreshToken,
   teamId,
-  expiresInSeconds,
+  expiresInSeconds
 }: {
   accessToken: string;
   refreshToken: string;
@@ -109,7 +109,7 @@ export const refreshSlackToken = async ({
     access_token: accessToken,
     refresh_token: refreshToken,
     expires_at: expiresAt,
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   });
 };
 
@@ -131,7 +131,7 @@ export const setVerifiedSlackUser = async (
     slack_user_id: userId,
     team_id: teamId,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore
     .doc(verifiedSlackUserDocument(teamId, userId))

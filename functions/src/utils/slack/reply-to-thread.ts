@@ -4,7 +4,7 @@ export const replyToSlackThread = async ({
   accessToken,
   channel,
   threadTimestamp,
-  text,
+  text
 }: {
   accessToken: string;
   channel: string;
@@ -17,7 +17,7 @@ export const replyToSlackThread = async ({
     const response = await web.chat.postMessage({
       channel: channel,
       text: text,
-      thread_ts: threadTimestamp,
+      thread_ts: threadTimestamp
     });
 
     if (!response.ok) {

@@ -40,8 +40,8 @@ export const refreshToken = async (
         client_id: SLACK_CLIENT_ID,
         client_secret: SLACK_CLIENT_SECRET,
         grant_type: "refresh_token",
-        refresh_token: refreshToken,
-      },
+        refresh_token: refreshToken
+      }
     }
   );
   return response.data;

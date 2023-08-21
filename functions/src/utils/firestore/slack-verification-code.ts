@@ -48,7 +48,7 @@ export const createSlackVerificationCode = async (
     expires_at: expiresAt,
     language: "jp",
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore
     .doc(slackVerificationCodeDocument(id))
