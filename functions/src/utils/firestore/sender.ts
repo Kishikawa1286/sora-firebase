@@ -29,12 +29,11 @@ type SlackSender = {
   sender_id: string; // `slack:${id}`
   sender_name: string;
   description: string;
-  icon_url: string;
+  icon_url?: string;
   slack_team_id: string;
   slack_team_domain: string;
-  slack_team_icon_url: string;
+  slack_team_icon_url?: string;
   slack_team_name: string
-  slack_email: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -57,14 +56,20 @@ const setSender = async ({
   const sender: Sender = {
     id,
     sender_name: senderName,
-    icon_url: iconUrl ?? "",
+    icon_url: iconUrl,
     description: "",
     type,
     group_ids: [],
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
-  await firestore.doc(senderDocument(userId, id)).set(sender);
+
+  const filteredSender = Object.entries(sender)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+  await firestore.doc(senderDocument(userId, id)).set(filteredSender);
 };
 
 export const setSlackSender = async ({
@@ -75,7 +80,6 @@ export const setSlackSender = async ({
   slackTeamDomain,
   slackTeamIconUrl,
   slackTeamName,
-  slackEmail,
   iconUrl
 }: {
   userId: string;
@@ -83,10 +87,9 @@ export const setSlackSender = async ({
   senderName: string;
   slackTeamId: string;
   slackTeamDomain: string;
-  slackTeamIconUrl: string;
+  slackTeamIconUrl?: string;
   slackTeamName: string;
-  slackEmail: string;
-  iconUrl: string;
+  iconUrl?: string;
 }): Promise<SlackSender> => {
   await setSender({
     id: senderId("slack", id),
@@ -103,12 +106,17 @@ export const setSlackSender = async ({
     slack_team_domain: slackTeamDomain,
     slack_team_icon_url: slackTeamIconUrl,
     slack_team_name: slackTeamName,
-    slack_email: slackEmail,
     icon_url: iconUrl,
     description: "",
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
-  await firestore.doc(slackSenderDocument(userId, id)).set(slackSender);
+
+  const filteredSlackSender = Object.entries(slackSender)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+  await firestore.doc(slackSenderDocument(userId, id)).set(filteredSlackSender);
   return slackSender;
 };

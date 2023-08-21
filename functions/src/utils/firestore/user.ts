@@ -22,7 +22,7 @@ type SlackUser = {
   slack_team_avatar_base_url?: string;
   slack_team_discoverable?: string;
   slack_team_domain: string;
-  slack_team_icon_url: string;
+  slack_team_icon_url?: string;
   slack_team_name: string
   language: string;
   created_at: Timestamp;
@@ -41,7 +41,8 @@ const isSlackUser = (data: unknown): data is SlackUser => {
     typeof slackUser.slack_team_avatar_base_url === "string" &&
     typeof slackUser.slack_team_discoverable === "string" &&
     typeof slackUser.slack_team_domain === "string" &&
-    typeof slackUser.slack_team_icon_url === "string" &&
+    (typeof slackUser.slack_team_icon_url === "string" ||
+      slackUser.slack_team_icon_url === undefined) &&
     typeof slackUser.slack_team_name === "string" &&
     typeof slackUser.language === "string" &&
     slackUser.created_at instanceof Timestamp &&
@@ -62,7 +63,13 @@ export const createUser = async ({
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
-  await firestore.doc(userDocument(id)).create(user);
+
+  const filteredUser = Object.entries(user)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+  await firestore.doc(userDocument(id)).create(filteredUser);
 };
 
 export const deleteUser = async (id: string) => {
@@ -96,7 +103,7 @@ export const setSlackUser = async ({
   slackTeamAvatarBaseUrl?: string;
   slackTeamDiscoverable?: string;
   slackTeamDomain: string;
-  slackTeamIconUrl: string;
+  slackTeamIconUrl?: string;
   slackTeamName: string;
   language: string;
 }): Promise<SlackUser> => {
@@ -113,7 +120,14 @@ export const setSlackUser = async ({
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
-  await firestore.doc(slackUserDocument(userId, slackUserId)).set(slackUser);
+
+  const filteredSlackUser = Object.entries(slackUser)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+  await firestore
+    .doc(slackUserDocument(userId, slackUserId)).set(filteredSlackUser);
   return slackUser;
 };
 

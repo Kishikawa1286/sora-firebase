@@ -13,6 +13,7 @@
                 "firebase-debug.*.log"
             ],
             "predeploy": [
+                "rm -rf \"$RESOURCE_DIR/lib\"",
                 "npm --prefix \"$RESOURCE_DIR\" run lint",
                 "npm --prefix \"$RESOURCE_DIR\" run build"
             ],            

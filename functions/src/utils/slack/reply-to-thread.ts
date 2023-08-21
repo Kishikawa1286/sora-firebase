@@ -21,12 +21,12 @@ export const replyToSlackThread = async ({
     });
 
     if (!response.ok) {
-      console.error("Error sending message:", response.error);
+      console.log(`Error sending message:, ${JSON.stringify(response.error).replace("\n", " ")}`);
       return;
     }
 
-    console.log("Message sent successfully:", response);
+    console.log("Message sent successfully:");
   } catch (error) {
-    console.error("Error sending message to Slack:", error);
+    console.log("Error sending message to Slack:", error);
   }
 };

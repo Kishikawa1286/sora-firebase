@@ -1,6 +1,7 @@
 import { createSlackMessage } from "../../../utils/firestore/message";
 import { setSlackSender } from "../../../utils/firestore/sender";
 import {
+  getSlackToken,
   getVerifiedSlackUser,
   setVerifiedSlackUser,
   VerifiedSlackUser
@@ -17,79 +18,44 @@ import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info"
 import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
 import { fetchUserInfo } from "../../../utils/slack/fetch-users-info";
 import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
+import { ChannelsMessageEvent, GroupsMessageEvent, IMMessageEvent, isChannelsMessageEvent, isGroupsMessageEvent, isIMMessageEvent, isMessageEvent } from "../../../utils/slack/types/message-events";
 import { getRefreshedAccessToken } from "./get-refreshed-access-token";
-
-type SlackBlock = Record<string, unknown>;
-
-type SlackEvent = {
-  client_msg_id: string;
-  type: "message";
-  text: string;
-  user: string;
-  ts: string;
-  blocks: SlackBlock[];
-  team: string;
-  channel: string;
-  event_ts: string;
-  channel_type: "channel" | "group" | "im" | "mpim";
-};
-
-type SlackAuthorization = {
-  enterprise_id: null | string;
-  team_id: string;
-  user_id: string;
-  is_bot: boolean;
-  is_enterprise_install: boolean;
-};
-
-type SlackWebhookRequestBody = {
-  token: string;
-  team_id: string;
-  context_team_id: string;
-  context_enterprise_id: null | string;
-  api_app_id: string;
-  event: SlackEvent;
-  type: "message";
-  event_id: string;
-  event_time: number;
-  authorizations: SlackAuthorization[];
-  is_ext_shared_channel: boolean;
-  event_context: string;
-};
 
 const handleDirectMessage = async (
   accessToken: string,
-  body: SlackWebhookRequestBody
+  event: IMMessageEvent
 ): Promise<void> => {
-  const { text } = body.event;
+  const { team_id: teamId } = event;
+  const { text, user: slackUserId, channel, ts: timestamp } = event.event;
   const verificationCodeData = await searchSlackVerificationCodeByCode(text);
-  const isCodeExists = verificationCodeData !== undefined;
+  const isCodeExists = verificationCodeData !== null;
   if (!isCodeExists) {
     return;
   }
 
-  const teamInfoRes = await fetchTeamInfo(accessToken, body.team_id);
+  const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
   const { team } = teamInfoRes;
   if (!team) {
-    throw new Error("Failed to fetch Slack team info");
+    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
   }
   const { domain, name, icon } = team;
   if (!domain || !name || !icon) {
-    throw new Error("Missing data from Slack team info");
+    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
   }
-  const teamIconUrl = icon.image_original;
+  const teamIconUrl = icon.image_132;
   if (!teamIconUrl) {
     throw new Error("Missing team icon URL");
   }
 
-  await setVerifiedSlackUser(body.team_id, verificationCodeData.app_user_id);
+  await setVerifiedSlackUser(
+    teamId, verificationCodeData.app_user_id, slackUserId);
 
   await deleteSlackVerificationCode(verificationCodeData.id);
 
   await setSlackUser({
     userId: verificationCodeData.app_user_id,
-    slackUserId: body.event.user,
-    slackTeamId: body.team_id,
+    slackUserId: slackUserId,
+    slackTeamId: teamId,
     slackTeamAvatarBaseUrl: team.avatar_base_url,
     slackTeamDiscoverable: team.discoverable,
     slackTeamDomain: domain,
@@ -100,80 +66,76 @@ const handleDirectMessage = async (
 
   await replyToSlackThread({
     accessToken,
-    channel: body.event.channel,
-    threadTimestamp: body.event.ts,
+    channel: channel,
+    threadTimestamp: timestamp,
     text: "認証されました！"
   });
 };
 
-const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
-  // Throw an error if it's a direct message
-  if (event.channel_type === "im") {
-    throw new Error("Direct messages are not supported.");
-  }
+const handleChannelMessage = async (
+  accessToken: string, event: ChannelsMessageEvent | GroupsMessageEvent) => {
+  const { team_id: teamId } = event;
+  const { text, user: slackUserId, channel, ts: timestamp } = event.event;
 
-  const mentionedUserIds = extractSlackMentions(event.text);
+  const mentionedUserIds = extractSlackMentions(text);
   const verifiedUsers = (
     await Promise.all(
       mentionedUserIds.map((slackUserId) =>
-        getVerifiedSlackUser(event.team, slackUserId)
+        getVerifiedSlackUser(teamId, slackUserId)
       )
     )
   ).filter((user) => user !== null) as VerifiedSlackUser[];
 
-  const senderInfo = await fetchUserInfo(accessToken, event.user);
+  if (verifiedUsers.length === 0) {
+    return;
+  }
+
+  const senderInfo = await fetchUserInfo(accessToken, slackUserId);
   if (!senderInfo.ok) {
-    throw new Error("Failed to fetch Slack user info");
+    throw new Error(`Missing data from Slack user info\n${JSON.stringify(senderInfo).replace("\n", " ")}`);
   }
 
-  const senderId = senderInfo.user?.id;
-  const senderName = senderInfo.user?.real_name;
-  const slackTeamId = senderInfo.user?.team_id;
-  const senderSlackEmail = senderInfo.user?.profile?.email;
-  const senderIconUrl = senderInfo.user?.profile?.image_original;
+  const senderSlackUserId = senderInfo.user?.id;
+  const senderSlackName = senderInfo.user?.real_name;
+  const senderSlackIconUrl = senderInfo.user?.profile?.image_512;
 
-  if (
-    !senderId ||
-    !senderName ||
-    !slackTeamId ||
-    !senderSlackEmail ||
-    !senderIconUrl
-  ) {
-    throw new Error("Missing data from Slack user info");
+  if (!senderSlackUserId || !senderSlackName) {
+    throw new Error(`Missing data from Slack user info\n${JSON.stringify(senderInfo).replace("\n", " ")}`);
   }
 
-  const channelName = await fetchChannelName(accessToken, event.channel);
+  const channelName = await fetchChannelName(accessToken, channel);
 
   if (!channelName) {
     throw new Error("Missing channel name");
   }
 
-  const teamInfoRes = await fetchTeamInfo(accessToken, event.team);
+  const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
   const { team } = teamInfoRes;
   if (!team) {
-    throw new Error("Failed to fetch Slack team info");
+    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
   }
-  const { domain, name, icon } = team;
-  if (!domain || !name || !icon) {
-    throw new Error("Missing data from Slack team info");
-  }
-  const teamIconUrl = icon.image_original;
-  if (!teamIconUrl) {
-    throw new Error("Missing team icon URL");
+  const {
+    domain: slackTeamDomain,
+    name: slackTeamName,
+    icon: slackTeamIcon
+  } = team;
+  const slackTeamIconUrl = slackTeamIcon?.image_132;
+  if (!slackTeamDomain || !slackTeamName) {
+    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
   }
 
-  const summary = await summarize(event.text);
+  const summary = await summarize(text);
 
   if (!summary) {
     throw new Error("Failed to summarize");
   }
 
-  const botMessage = `あなたのメッセージと以下の要約を送信しました。\n\n ${summary}`;
+  const botMessage = `あなたのメッセージと以下の要約を送信しました。\n\n ${summary} `;
 
   await replyToSlackThread({
     accessToken,
-    channel: event.channel,
-    threadTimestamp: event.ts,
+    channel: channel,
+    threadTimestamp: timestamp,
     text: botMessage
   });
 
@@ -181,37 +143,36 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
     // For all mentioned verified users
     verifiedUsers.map(async (user) => {
       const userId = user.id; // Firebase User ID
+      // Update the Sender Document in Firestore
+      const slackSender = await setSlackSender({
+        userId,
+        id: senderSlackUserId,
+        senderName: senderSlackName,
+        slackTeamId: teamId,
+        slackTeamDomain,
+        slackTeamIconUrl,
+        slackTeamName,
+        iconUrl: senderSlackIconUrl
+      });
+
       // Create a Message Document in Firestore
       await createSlackMessage({
         userId,
-        message: event.text,
+        message: text,
         summary,
         botMessage,
-        senderId,
-        senderName,
-        senderIconUrl,
-        slackTeamId,
-        slackTeamDomain: domain,
-        slackTeamIconUrl: teamIconUrl,
-        slackTeamName: name,
-        slackUserId: event.user,
-        slackSenderUserId: event.user,
-        slackChannelId: event.channel,
+        senderId: slackSender.sender_id,
+        senderName: senderSlackName,
+        senderIconUrl: senderSlackIconUrl,
+        slackTeamId: teamId,
+        slackTeamDomain,
+        slackTeamIconUrl,
+        slackTeamName,
+        slackUserId,
+        slackSenderUserId: senderSlackUserId,
+        slackChannelId: channel,
         slackChannelName: channelName,
-        slackThreadTs: event.ts
-      });
-
-      // Update the Sender Document in Firestore
-      await setSlackSender({
-        userId,
-        id: senderId,
-        senderName,
-        slackTeamId,
-        slackTeamDomain: domain,
-        slackTeamIconUrl: teamIconUrl,
-        slackTeamName: name,
-        slackEmail: senderSlackEmail,
-        iconUrl: senderIconUrl
+        slackThreadTs: timestamp
       });
     })
   );
@@ -221,26 +182,48 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
     // Handling URL verification
     if (req.body.type === "url_verification") {
-      res.send(req.body.challenge);
+      res.status(200).send(req.body.challenge);
       return;
     }
 
-    const body: SlackWebhookRequestBody = req.body;
+    const { body } = req;
+    if (!isMessageEvent(body)) {
+      res.status(200).send("Success");
+      return;
+    }
 
-    const teamId = body.team_id; // Retrieve teamId from the Slack request
+    const { team_id: teamId, event } = body;
 
-    // Refresh if expired
+    const { user: slackUserId } = event;
+    const tokenData = await getSlackToken(teamId);
+    if (slackUserId === tokenData.bot_user_id) {
+      res.status(200).send("Success");
+      return;
+    }
+
     const accessToken = await getRefreshedAccessToken(teamId);
 
-    if (body.event.channel_type === "im") {
+    if (isIMMessageEvent(body)) {
+      const mentionedUserIds = extractSlackMentions(event.text);
+      const verifiedUsers = (
+        await Promise.all(
+          mentionedUserIds.map((slackUserId) =>
+            getVerifiedSlackUser(teamId, slackUserId)
+          )
+        )
+      ).filter((user) => user !== null) as VerifiedSlackUser[];
+      console.log(verifiedUsers);
+
       await handleDirectMessage(accessToken, body);
-    } else {
-      await handleChannelMessage(accessToken, body.event);
+    } else if (isChannelsMessageEvent(body)) {
+      await handleChannelMessage(accessToken, body);
+    } else if (isGroupsMessageEvent(body)) {
+      await handleChannelMessage(accessToken, body);
     }
 
     res.status(200).send("Success");
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).send("Internal Server Error");
   }
 });

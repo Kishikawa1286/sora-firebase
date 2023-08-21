@@ -27,7 +27,7 @@ type Message = {
   reply: string;
   sender_id: string;
   sender_name: string;
-  sender_icon_url: string;
+  sender_icon_url?: string;
   image_urls: string[];
   file_attached: boolean;
   replied: boolean;
@@ -52,7 +52,8 @@ const isMessage = (data: unknown): data is Message => {
     typeof message.reply === "string" &&
     typeof message.sender_id === "string" &&
     typeof message.sender_name === "string" &&
-    typeof message.sender_icon_url === "string" &&
+    (typeof message.sender_icon_url === "string" ||
+      message.sender_icon_url === undefined) &&
     message.image_urls instanceof Array &&
     message.image_urls.every((url) => typeof url === "string") &&
     typeof message.file_attached === "boolean" &&
@@ -73,12 +74,12 @@ type SlackMessage = {
   bot_message: string;
   sender_id: string; // firestore document id
   sender_name: string;
-  sender_icon_url: string;
+  sender_icon_url?: string;
   image_urls: string[];
   file_attached: boolean;
   slack_team_id: string;
   slack_team_domain: string;
-  slack_team_icon_url: string;
+  slack_team_icon_url?: string;
   slack_team_name: string
   slack_user_id: string;
   slack_sender_user_id: string;
@@ -103,13 +104,15 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
     typeof slackMessage.bot_message === "string" &&
     typeof slackMessage.sender_id === "string" &&
     typeof slackMessage.sender_name === "string" &&
-    typeof slackMessage.sender_icon_url === "string" &&
+    (typeof slackMessage.sender_icon_url === "string" ||
+      slackMessage.sender_icon_url === undefined) &&
     slackMessage.image_urls instanceof Array &&
     slackMessage.image_urls.every((url) => typeof url === "string") &&
     typeof slackMessage.file_attached === "boolean" &&
     typeof slackMessage.slack_team_id === "string" &&
     typeof slackMessage.slack_team_domain === "string" &&
-    typeof slackMessage.slack_team_icon_url === "string" &&
+    (typeof slackMessage.slack_team_icon_url === "string" ||
+      slackMessage.slack_team_icon_url === undefined) &&
     typeof slackMessage.slack_team_name === "string" &&
     typeof slackMessage.slack_user_id === "string" &&
     typeof slackMessage.slack_sender_user_id === "string" &&
@@ -185,12 +188,12 @@ export const createSlackMessage = async ({
   botMessage: string;
   senderId: string;
   senderName: string;
-  senderIconUrl: string;
+  senderIconUrl?: string;
   imageUrls?: string[];
   fileAttached?: boolean;
   slackTeamId: string;
   slackTeamDomain: string;
-  slackTeamIconUrl: string;
+  slackTeamIconUrl?: string;
   slackTeamName: string;
   slackUserId: string;
   slackSenderUserId: string;
@@ -243,10 +246,22 @@ export const createSlackMessage = async ({
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
-  await firestore.doc(messageDocument(userId, messageId)).create(messageData);
+
+  const filteredMessageData = Object.entries(messageData)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+  const filteredSlackMessage = Object.entries(slackMessage)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .filter(([_, value]) => value !== undefined)
+    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+
+  await firestore
+    .doc(messageDocument(userId, messageId))
+    .create(filteredMessageData);
   await firestore
     .doc(slackMessageDocument(userId, messageId, id))
-    .create(slackMessage);
+    .create(filteredSlackMessage);
   return slackMessage;
 };
 

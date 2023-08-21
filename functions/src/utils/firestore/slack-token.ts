@@ -124,11 +124,12 @@ export const getSlackToken = async (teamId: string): Promise<SlackToken> => {
 
 export const setVerifiedSlackUser = async (
   teamId: string,
-  userId: string // App user ID
+  userId: string, // App user ID
+  slackUserId: string
 ): Promise<void> => {
   const verifiedSlackUser: VerifiedSlackUser = {
     id: userId,
-    slack_user_id: userId,
+    slack_user_id: slackUserId,
     team_id: teamId,
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()

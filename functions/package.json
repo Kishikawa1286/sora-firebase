@@ -1,7 +1,7 @@
 {
     "name": "functions",
     "private": true,
-    "main": "lib/index.js",
+    "main": "lib/src/index.js",
     "scripts": {
         "build": "npx tsc",
         "build:watch": "npx tsc --watch",
@@ -11,7 +11,8 @@
         "serve": "npm run build && firebase emulators:start --only functions",
         "shell": "npm run build && firebase functions:shell",
         "start": "npm run shell",
-        "test": "DOTENV_CONFIG_PATH=.env.dev mocha 'test/**/*.ts' --require dotenv/config --require ts-node/register"    },
+        "test": "DOTENV_CONFIG_PATH=.env.dev mocha 'test/**/*.ts' --require dotenv/config --require ts-node/register"
+    },
     "dependencies": {
         "@slack/web-api": "6.9.0",
         "axios": "1.4.0",
