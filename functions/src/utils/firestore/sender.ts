@@ -16,10 +16,10 @@ const slackSenderDocument = (userId: string, slackSenderId: string) =>
 type Sender = {
   id: string;
   sender_name: string;
-  icon_url: string;
   description: string;
   type: MessageType;
   group_ids: string[];
+  icon_url?: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -28,6 +28,8 @@ type SlackSender = {
   id: string; // slack user id
   sender_id: string; // `slack:${id}`
   sender_name: string;
+  description: string;
+  icon_url: string;
   slack_team_id: string;
   slack_email: string;
   created_at: Timestamp;
@@ -41,7 +43,7 @@ const setSender = async ({
   id,
   senderName,
   type,
-  iconUrl,
+  iconUrl
 }: {
   userId: string;
   id: string;
@@ -57,7 +59,7 @@ const setSender = async ({
     type,
     group_ids: [],
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore.doc(senderDocument(userId, id)).set(sender);
 };
@@ -68,21 +70,21 @@ export const setSlackSender = async ({
   senderName,
   slackTeamId,
   slackEmail,
-  iconUrl,
+  iconUrl
 }: {
   userId: string;
   id: string;
   senderName: string;
   slackTeamId: string;
   slackEmail: string;
-  iconUrl?: string;
+  iconUrl: string;
 }): Promise<SlackSender> => {
   await setSender({
     id: senderId("slack", id),
     userId,
     senderName,
     type: "slack",
-    iconUrl,
+    iconUrl
   });
   const slackSender: SlackSender = {
     id,
@@ -90,8 +92,10 @@ export const setSlackSender = async ({
     sender_name: senderName,
     slack_team_id: slackTeamId,
     slack_email: slackEmail,
+    icon_url: iconUrl,
+    description: "",
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore.doc(slackSenderDocument(userId, id)).set(slackSender);
   return slackSender;

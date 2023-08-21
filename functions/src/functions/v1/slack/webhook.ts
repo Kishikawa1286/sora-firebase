@@ -3,16 +3,18 @@ import { setSlackSender } from "../../../utils/firestore/sender";
 import {
   getVerifiedSlackUser,
   setVerifiedSlackUser,
-  VerifiedSlackUser,
+  VerifiedSlackUser
 } from "../../../utils/firestore/slack-token";
 import {
   deleteSlackVerificationCode,
-  searchSlackVerificationCodeByCode,
+  searchSlackVerificationCodeByCode
 } from "../../../utils/firestore/slack-verification-code";
+import { setSlackUser } from "../../../utils/firestore/user";
 import { functions256MB } from "../../../utils/functions";
 import { summarize } from "../../../utils/openai/summarize";
 import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
 import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info";
+import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
 import { fetchUserInfo } from "../../../utils/slack/fetch-users-info";
 import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 import { getRefreshedAccessToken } from "./get-refreshed-access-token";
@@ -62,20 +64,45 @@ const handleDirectMessage = async (
   const { text } = body.event;
   const verificationCodeData = await searchSlackVerificationCodeByCode(text);
   const isCodeExists = verificationCodeData !== undefined;
-
   if (!isCodeExists) {
     return;
+  }
+
+  const teamInfoRes = await fetchTeamInfo(accessToken, body.team_id);
+  const { team } = teamInfoRes;
+  if (!team) {
+    throw new Error("Failed to fetch Slack team info");
+  }
+  const { domain, name, icon } = team;
+  if (!domain || !name || !icon) {
+    throw new Error("Missing data from Slack team info");
+  }
+  const teamIconUrl = icon.image_original;
+  if (!teamIconUrl) {
+    throw new Error("Missing team icon URL");
   }
 
   await setVerifiedSlackUser(body.team_id, verificationCodeData.app_user_id);
 
   await deleteSlackVerificationCode(verificationCodeData.id);
 
+  await setSlackUser({
+    userId: verificationCodeData.app_user_id,
+    slackUserId: body.event.user,
+    slackTeamId: body.team_id,
+    slackTeamAvatarBaseUrl: team.avatar_base_url,
+    slackTeamDiscoverable: team.discoverable,
+    slackTeamDomain: domain,
+    slackTeamIconUrl: teamIconUrl,
+    slackTeamName: name,
+    language: verificationCodeData.language
+  });
+
   await replyToSlackThread({
     accessToken,
     channel: body.event.channel,
     threadTimestamp: body.event.ts,
-    text: "認証されました！",
+    text: "認証されました！"
   });
 };
 
@@ -133,7 +160,7 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
     accessToken,
     channel: event.channel,
     threadTimestamp: event.ts,
-    text: botMessage,
+    text: botMessage
   });
 
   await Promise.all(
@@ -154,7 +181,7 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
         slackSenderUserId: event.user,
         slackChannelId: event.channel,
         slackChannelName: channelName,
-        slackThreadTs: event.ts,
+        slackThreadTs: event.ts
       });
 
       // Update the Sender Document in Firestore
@@ -164,7 +191,7 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
         senderName,
         slackTeamId,
         slackEmail: senderSlackEmail,
-        iconUrl: senderIconUrl,
+        iconUrl: senderIconUrl
       });
     })
   );
