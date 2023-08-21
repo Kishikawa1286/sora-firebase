@@ -31,6 +31,9 @@ type SlackSender = {
   description: string;
   icon_url: string;
   slack_team_id: string;
+  slack_team_domain: string;
+  slack_team_icon_url: string;
+  slack_team_name: string
   slack_email: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
@@ -69,6 +72,9 @@ export const setSlackSender = async ({
   id,
   senderName,
   slackTeamId,
+  slackTeamDomain,
+  slackTeamIconUrl,
+  slackTeamName,
   slackEmail,
   iconUrl
 }: {
@@ -76,6 +82,9 @@ export const setSlackSender = async ({
   id: string;
   senderName: string;
   slackTeamId: string;
+  slackTeamDomain: string;
+  slackTeamIconUrl: string;
+  slackTeamName: string;
   slackEmail: string;
   iconUrl: string;
 }): Promise<SlackSender> => {
@@ -91,6 +100,9 @@ export const setSlackSender = async ({
     sender_id: senderId("slack", id),
     sender_name: senderName,
     slack_team_id: slackTeamId,
+    slack_team_domain: slackTeamDomain,
+    slack_team_icon_url: slackTeamIconUrl,
+    slack_team_name: slackTeamName,
     slack_email: slackEmail,
     icon_url: iconUrl,
     description: "",

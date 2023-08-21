@@ -148,6 +148,20 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
     throw new Error("Missing channel name");
   }
 
+  const teamInfoRes = await fetchTeamInfo(accessToken, event.team);
+  const { team } = teamInfoRes;
+  if (!team) {
+    throw new Error("Failed to fetch Slack team info");
+  }
+  const { domain, name, icon } = team;
+  if (!domain || !name || !icon) {
+    throw new Error("Missing data from Slack team info");
+  }
+  const teamIconUrl = icon.image_original;
+  if (!teamIconUrl) {
+    throw new Error("Missing team icon URL");
+  }
+
   const summary = await summarize(event.text);
 
   if (!summary) {
@@ -177,6 +191,9 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
         senderName,
         senderIconUrl,
         slackTeamId,
+        slackTeamDomain: domain,
+        slackTeamIconUrl: teamIconUrl,
+        slackTeamName: name,
         slackUserId: event.user,
         slackSenderUserId: event.user,
         slackChannelId: event.channel,
@@ -190,6 +207,9 @@ const handleChannelMessage = async (accessToken: string, event: SlackEvent) => {
         id: senderId,
         senderName,
         slackTeamId,
+        slackTeamDomain: domain,
+        slackTeamIconUrl: teamIconUrl,
+        slackTeamName: name,
         slackEmail: senderSlackEmail,
         iconUrl: senderIconUrl
       });
