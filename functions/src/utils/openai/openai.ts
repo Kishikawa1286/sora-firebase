@@ -38,7 +38,7 @@ export const singleCompletion = async ({
   systemMessage,
   userMessage,
   examples,
-  params,
+  params
 }: {
   userMessage: string;
   systemMessage?: string;
@@ -68,7 +68,7 @@ export const singleCompletion = async ({
   const completion = await openai.chat.completions.create({
     model: "gpt-3.5-turbo", // 補完のためにgpt-3.5-turboモデルを使用します。
     messages,
-    ...params,
+    ...params
   });
 
   // 補完の選択肢からアシスタントの応答を抽出します。

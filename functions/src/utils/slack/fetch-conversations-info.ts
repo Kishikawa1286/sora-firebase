@@ -6,7 +6,7 @@ export const fetchConversationsInfo = async (
 ): Promise<ConversationsInfoResponse> => {
   const web = new WebClient(accessToken);
   const data = await web.conversations.info({
-    channel: channelId,
+    channel: channelId
   });
   return data;
 };

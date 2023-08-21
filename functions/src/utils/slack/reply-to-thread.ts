@@ -4,7 +4,7 @@ export const replyToSlackThread = async ({
   accessToken,
   channel,
   threadTimestamp,
-  text,
+  text
 }: {
   accessToken: string;
   channel: string;
@@ -17,16 +17,16 @@ export const replyToSlackThread = async ({
     const response = await web.chat.postMessage({
       channel: channel,
       text: text,
-      thread_ts: threadTimestamp,
+      thread_ts: threadTimestamp
     });
 
     if (!response.ok) {
-      console.error("Error sending message:", response.error);
+      console.log(`Error sending message:, ${JSON.stringify(response.error).replace("\n", " ")}`);
       return;
     }
 
-    console.log("Message sent successfully:", response);
+    console.log("Message sent successfully:");
   } catch (error) {
-    console.error("Error sending message to Slack:", error);
+    console.log("Error sending message to Slack:", error);
   }
 };

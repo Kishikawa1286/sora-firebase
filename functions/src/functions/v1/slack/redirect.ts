@@ -36,12 +36,12 @@ export const slackRedirect = functions128MB.https.onRequest(
         accessToken,
         expiresInSeconds,
         refreshToken,
-        botUserId,
+        botUserId
       });
 
       res.status(200).redirect(`https://app.slack.com/client/${teamId}`);
     } catch (error) {
-      console.error(error);
+      console.log(error);
       res.status(500).send("Internal Server Error");
     }
   }

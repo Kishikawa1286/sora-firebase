@@ -29,14 +29,14 @@ export const slackReply = functions128MB.https.onCall(
     await onReply({
       userId,
       messageId,
-      reply,
+      reply
     });
 
     await replyToSlackThread({
       accessToken,
       channel: message.slack_channel_id,
       threadTimestamp: message.slack_thread_ts,
-      text: reply,
+      text: reply
     });
   }
 );

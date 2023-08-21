@@ -48,7 +48,7 @@ export const createSlackVerificationCode = async (
     expires_at: expiresAt,
     language: "jp",
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
   await firestore
     .doc(slackVerificationCodeDocument(id))
@@ -58,13 +58,14 @@ export const createSlackVerificationCode = async (
 
 export const searchSlackVerificationCodeByCode = async (
   code: string
-): Promise<SlackVerificationCode> => {
+): Promise<SlackVerificationCode | null> => {
   const snapshot = await firestore
     .collection(slackVerificationCodesCollection)
     .where("code", "==", code)
     .get();
   if (snapshot.empty) {
-    throw new Error("Slack verification code not found");
+    console.log(`Slack verification code not found: ${code}`);
+    return null;
   }
   const data = snapshot.docs[0].data();
   if (!isSlackVerificationCode(data)) {
