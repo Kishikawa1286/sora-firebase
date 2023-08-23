@@ -1,5 +1,5 @@
-import { OauthV2AccessResponse, WebClient } from '@slack/web-api';
-import { SLACK_CLIENT_ID, SLACK_CLIENT_SECRET } from '../../utils/env';
+import { OauthV2AccessResponse, WebClient } from "@slack/web-api";
+import { SLACK_CLIENT_ID, SLACK_CLIENT_SECRET } from "../../utils/env";
 
 export const fetchSlackAccessToken = async (
   code: string,
@@ -9,11 +9,11 @@ export const fetchSlackAccessToken = async (
   const data = await web.oauth.v2.access({
     client_id: SLACK_CLIENT_ID,
     client_secret: SLACK_CLIENT_SECRET,
-    code: code,
+    code: code
   });
 
   if (!data.ok) {
-    throw new Error('Error: data.ok is not true');
+    throw new Error("Error: data.ok is not true");
   }
 
   return data;

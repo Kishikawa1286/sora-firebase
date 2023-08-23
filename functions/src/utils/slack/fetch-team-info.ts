@@ -1,4 +1,4 @@
-import { TeamInfoResponse, WebClient } from '@slack/web-api';
+import { TeamInfoResponse, WebClient } from "@slack/web-api";
 
 export const fetchTeamInfo = async (
   accessToken: string,
