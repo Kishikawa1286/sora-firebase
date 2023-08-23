@@ -1,29 +1,37 @@
-import { createSlackMessage } from "../../../utils/firestore/message";
-import { setSlackSender } from "../../../utils/firestore/sender";
+import { createSlackMessage } from '../../../utils/firestore/message';
+import { setSlackSender } from '../../../utils/firestore/sender';
 import {
   getSlackToken,
   getVerifiedSlackUser,
   setVerifiedSlackUser,
-  VerifiedSlackUser
-} from "../../../utils/firestore/slack-token";
+  VerifiedSlackUser,
+} from '../../../utils/firestore/slack-token';
 import {
   deleteSlackVerificationCode,
-  searchSlackVerificationCodeByCode
-} from "../../../utils/firestore/slack-verification-code";
-import { setSlackUser } from "../../../utils/firestore/user";
-import { functions256MB } from "../../../utils/functions";
-import { summarize } from "../../../utils/openai/summarize";
-import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
-import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info";
-import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
-import { fetchUserInfo } from "../../../utils/slack/fetch-users-info";
-import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
-import { ChannelsMessageEvent, GroupsMessageEvent, IMMessageEvent, isChannelsMessageEvent, isGroupsMessageEvent, isIMMessageEvent, isMessageEvent } from "../../../utils/slack/types/message-events";
-import { getRefreshedAccessToken } from "./get-refreshed-access-token";
+  searchSlackVerificationCodeByCode,
+} from '../../../utils/firestore/slack-verification-code';
+import { setSlackUser } from '../../../utils/firestore/user';
+import { functions256MB } from '../../../utils/functions';
+import { summarize } from '../../../utils/openai/summarize';
+import { extractSlackMentions } from '../../../utils/slack/extract-mentions';
+import { fetchChannelName } from '../../../utils/slack/fetch-conversations-info';
+import { fetchTeamInfo } from '../../../utils/slack/fetch-team-info';
+import { fetchUserInfo } from '../../../utils/slack/fetch-users-info';
+import { replyToSlackThread } from '../../../utils/slack/reply-to-thread';
+import {
+  ChannelsMessageEvent,
+  GroupsMessageEvent,
+  IMMessageEvent,
+  isChannelsMessageEvent,
+  isGroupsMessageEvent,
+  isIMMessageEvent,
+  isMessageEvent,
+} from '../../../utils/slack/types/message-events';
+import { getRefreshedAccessToken } from './get-refreshed-access-token';
 
 const handleDirectMessage = async (
   accessToken: string,
-  event: IMMessageEvent
+  event: IMMessageEvent,
 ): Promise<void> => {
   const { team_id: teamId } = event;
   const { text, user: slackUserId, channel, ts: timestamp } = event.event;
@@ -36,19 +44,32 @@ const handleDirectMessage = async (
   const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
   const { team } = teamInfoRes;
   if (!team) {
-    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
+    throw new Error(
+      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
+        '\n',
+        ' ',
+      )}}`,
+    );
   }
   const { domain, name, icon } = team;
   if (!domain || !name || !icon) {
-    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
+    throw new Error(
+      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
+        '\n',
+        ' ',
+      )}}`,
+    );
   }
   const teamIconUrl = icon.image_132;
   if (!teamIconUrl) {
-    throw new Error("Missing team icon URL");
+    throw new Error('Missing team icon URL');
   }
 
   await setVerifiedSlackUser(
-    teamId, verificationCodeData.app_user_id, slackUserId);
+    teamId,
+    verificationCodeData.app_user_id,
+    slackUserId,
+  );
 
   await deleteSlackVerificationCode(verificationCodeData.id);
 
@@ -61,19 +82,21 @@ const handleDirectMessage = async (
     slackTeamDomain: domain,
     slackTeamIconUrl: teamIconUrl,
     slackTeamName: name,
-    language: verificationCodeData.language
+    language: verificationCodeData.language,
   });
 
   await replyToSlackThread({
     accessToken,
     channel: channel,
     threadTimestamp: timestamp,
-    text: "認証されました！"
+    text: '認証されました！',
   });
 };
 
 const handleChannelMessage = async (
-  accessToken: string, event: ChannelsMessageEvent | GroupsMessageEvent) => {
+  accessToken: string,
+  event: ChannelsMessageEvent | GroupsMessageEvent,
+) => {
   const { team_id: teamId } = event;
   const { text, user: slackUserId, channel, ts: timestamp } = event.event;
 
@@ -81,8 +104,8 @@ const handleChannelMessage = async (
   const verifiedUsers = (
     await Promise.all(
       mentionedUserIds.map((slackUserId) =>
-        getVerifiedSlackUser(teamId, slackUserId)
-      )
+        getVerifiedSlackUser(teamId, slackUserId),
+      ),
     )
   ).filter((user) => user !== null) as VerifiedSlackUser[];
 
@@ -92,7 +115,12 @@ const handleChannelMessage = async (
 
   const senderInfo = await fetchUserInfo(accessToken, slackUserId);
   if (!senderInfo.ok) {
-    throw new Error(`Missing data from Slack user info\n${JSON.stringify(senderInfo).replace("\n", " ")}`);
+    throw new Error(
+      `Missing data from Slack user info\n${JSON.stringify(senderInfo).replace(
+        '\n',
+        ' ',
+      )}`,
+    );
   }
 
   const senderSlackUserId = senderInfo.user?.id;
@@ -100,34 +128,49 @@ const handleChannelMessage = async (
   const senderSlackIconUrl = senderInfo.user?.profile?.image_512;
 
   if (!senderSlackUserId || !senderSlackName) {
-    throw new Error(`Missing data from Slack user info\n${JSON.stringify(senderInfo).replace("\n", " ")}`);
+    throw new Error(
+      `Missing data from Slack user info\n${JSON.stringify(senderInfo).replace(
+        '\n',
+        ' ',
+      )}`,
+    );
   }
 
   const channelName = await fetchChannelName(accessToken, channel);
 
   if (!channelName) {
-    throw new Error("Missing channel name");
+    throw new Error('Missing channel name');
   }
 
   const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
   const { team } = teamInfoRes;
   if (!team) {
-    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
+    throw new Error(
+      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
+        '\n',
+        ' ',
+      )}}`,
+    );
   }
   const {
     domain: slackTeamDomain,
     name: slackTeamName,
-    icon: slackTeamIcon
+    icon: slackTeamIcon,
   } = team;
   const slackTeamIconUrl = slackTeamIcon?.image_132;
   if (!slackTeamDomain || !slackTeamName) {
-    throw new Error(`Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace("\n", " ")}}`);
+    throw new Error(
+      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
+        '\n',
+        ' ',
+      )}}`,
+    );
   }
 
   const summary = await summarize(text);
 
   if (!summary) {
-    throw new Error("Failed to summarize");
+    throw new Error('Failed to summarize');
   }
 
   const botMessage = `あなたのメッセージと以下の要約を送信しました。\n\n ${summary} `;
@@ -136,7 +179,7 @@ const handleChannelMessage = async (
     accessToken,
     channel: channel,
     threadTimestamp: timestamp,
-    text: botMessage
+    text: botMessage,
   });
 
   await Promise.all(
@@ -152,7 +195,7 @@ const handleChannelMessage = async (
         slackTeamDomain,
         slackTeamIconUrl,
         slackTeamName,
-        iconUrl: senderSlackIconUrl
+        iconUrl: senderSlackIconUrl,
       });
 
       // Create a Message Document in Firestore
@@ -172,23 +215,23 @@ const handleChannelMessage = async (
         slackSenderUserId: senderSlackUserId,
         slackChannelId: channel,
         slackChannelName: channelName,
-        slackThreadTs: timestamp
+        slackThreadTs: timestamp,
       });
-    })
+    }),
   );
 };
 
 export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
     // Handling URL verification
-    if (req.body.type === "url_verification") {
+    if (req.body.type === 'url_verification') {
       res.status(200).send(req.body.challenge);
       return;
     }
 
     const { body } = req;
     if (!isMessageEvent(body)) {
-      res.status(200).send("Success");
+      res.status(200).send('Success');
       return;
     }
 
@@ -197,7 +240,7 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
     const { user: slackUserId } = event;
     const tokenData = await getSlackToken(teamId);
     if (slackUserId === tokenData.bot_user_id) {
-      res.status(200).send("Success");
+      res.status(200).send('Success');
       return;
     }
 
@@ -208,8 +251,8 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
       const verifiedUsers = (
         await Promise.all(
           mentionedUserIds.map((slackUserId) =>
-            getVerifiedSlackUser(teamId, slackUserId)
-          )
+            getVerifiedSlackUser(teamId, slackUserId),
+          ),
         )
       ).filter((user) => user !== null) as VerifiedSlackUser[];
       console.log(verifiedUsers);
@@ -221,9 +264,9 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
       await handleChannelMessage(accessToken, body);
     }
 
-    res.status(200).send("Success");
+    res.status(200).send('Success');
   } catch (error) {
     console.log(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send('Internal Server Error');
   }
 });

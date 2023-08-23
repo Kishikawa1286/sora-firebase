@@ -1,5 +1,5 @@
-import OpenAI from "openai";
-import { OPENAI_API_KEY } from "../env";
+import OpenAI from 'openai';
+import { OPENAI_API_KEY } from '../env';
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
@@ -38,7 +38,7 @@ export const singleCompletion = async ({
   systemMessage,
   userMessage,
   examples,
-  params
+  params,
 }: {
   userMessage: string;
   systemMessage?: string;
@@ -46,29 +46,30 @@ export const singleCompletion = async ({
   params?: CompletionCreateParams;
 }): Promise<string | null> => {
   // メッセージのシーケンスを保持するための配列を準備します。
-  const messages: { role: "system" | "user" | "assistant"; content: string }[] = [];
+  const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] =
+    [];
 
   // システムメッセージが提供されている場合は追加します。
   if (systemMessage) {
-    messages.push({ role: "system", content: systemMessage });
+    messages.push({ role: 'system', content: systemMessage });
   }
 
   // 例が提供されている場合、これらを使用してアシスタントの応答をガイドします。
   if (examples) {
     for (const example of examples) {
-      messages.push({ role: "user", content: example.userMessage });
-      messages.push({ role: "assistant", content: example.assistantMessage });
+      messages.push({ role: 'user', content: example.userMessage });
+      messages.push({ role: 'assistant', content: example.assistantMessage });
     }
   }
 
   // ユーザーのメッセージを追加します。
-  messages.push({ role: "user", content: userMessage });
+  messages.push({ role: 'user', content: userMessage });
 
   // OpenAIから補完をリクエストします。
   const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo", // 補完のためにgpt-3.5-turboモデルを使用します。
+    model: 'gpt-3.5-turbo', // 補完のためにgpt-3.5-turboモデルを使用します。
     messages,
-    ...params
+    ...params,
   });
 
   // 補完の選択肢からアシスタントの応答を抽出します。
