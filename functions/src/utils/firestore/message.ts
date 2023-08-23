@@ -1,9 +1,9 @@
-import { Timestamp } from "firebase-admin/firestore";
-import { firestore } from "../admin";
-import { randomString } from "../random-string";
-import { userDocument } from "./user";
+import { Timestamp } from 'firebase-admin/firestore';
+import { firestore } from '../admin';
+import { randomString } from '../random-string';
+import { userDocument } from './user';
 
-export type MessageType = "slack";
+export type MessageType = 'slack';
 
 const messagesCollection = (userId: string) =>
   `${userDocument(userId)}/messages_v1`;
@@ -14,7 +14,7 @@ const slackMessageCollection = (userId: string, messageId: string) =>
 const slackMessageDocument = (
   userId: string,
   messageId: string,
-  slackMessageId: string
+  slackMessageId: string,
 ) => `${slackMessageCollection(userId, messageId)}/${slackMessageId}`;
 
 type Message = {
@@ -38,28 +38,28 @@ type Message = {
 };
 
 const isMessage = (data: unknown): data is Message => {
-  if (typeof data !== "object" || data === null) {
+  if (typeof data !== 'object' || data === null) {
     return false;
   }
   const message = data as Message;
   return (
-    typeof message.id === "string" &&
-    typeof message.user_id === "string" &&
-    typeof message.type === "string" &&
-    typeof message.message === "string" &&
-    typeof message.summary === "string" &&
-    typeof message.bot_message === "string" &&
-    typeof message.reply === "string" &&
-    typeof message.sender_id === "string" &&
-    typeof message.sender_name === "string" &&
-    (typeof message.sender_icon_url === "string" ||
+    typeof message.id === 'string' &&
+    typeof message.user_id === 'string' &&
+    typeof message.type === 'string' &&
+    typeof message.message === 'string' &&
+    typeof message.summary === 'string' &&
+    typeof message.bot_message === 'string' &&
+    typeof message.reply === 'string' &&
+    typeof message.sender_id === 'string' &&
+    typeof message.sender_name === 'string' &&
+    (typeof message.sender_icon_url === 'string' ||
       message.sender_icon_url === undefined) &&
     message.image_urls instanceof Array &&
-    message.image_urls.every((url) => typeof url === "string") &&
-    typeof message.file_attached === "boolean" &&
-    typeof message.replied === "boolean" &&
-    typeof message.archived === "boolean" &&
-    typeof message.read === "boolean" &&
+    message.image_urls.every((url) => typeof url === 'string') &&
+    typeof message.file_attached === 'boolean' &&
+    typeof message.replied === 'boolean' &&
+    typeof message.archived === 'boolean' &&
+    typeof message.read === 'boolean' &&
     message.created_at instanceof Timestamp &&
     message.last_updated_at instanceof Timestamp
   );
@@ -80,7 +80,7 @@ type SlackMessage = {
   slack_team_id: string;
   slack_team_domain: string;
   slack_team_icon_url?: string;
-  slack_team_name: string
+  slack_team_name: string;
   slack_user_id: string;
   slack_sender_user_id: string;
   slack_channel_id: string;
@@ -91,34 +91,34 @@ type SlackMessage = {
 };
 
 const isSlackMessage = (data: unknown): data is SlackMessage => {
-  if (typeof data !== "object" || data === null) {
+  if (typeof data !== 'object' || data === null) {
     return false;
   }
   const slackMessage = data as SlackMessage;
   return (
-    typeof slackMessage.id === "string" &&
-    typeof slackMessage.user_id === "string" &&
-    typeof slackMessage.message_id === "string" &&
-    typeof slackMessage.message === "string" &&
-    typeof slackMessage.summary === "string" &&
-    typeof slackMessage.bot_message === "string" &&
-    typeof slackMessage.sender_id === "string" &&
-    typeof slackMessage.sender_name === "string" &&
-    (typeof slackMessage.sender_icon_url === "string" ||
+    typeof slackMessage.id === 'string' &&
+    typeof slackMessage.user_id === 'string' &&
+    typeof slackMessage.message_id === 'string' &&
+    typeof slackMessage.message === 'string' &&
+    typeof slackMessage.summary === 'string' &&
+    typeof slackMessage.bot_message === 'string' &&
+    typeof slackMessage.sender_id === 'string' &&
+    typeof slackMessage.sender_name === 'string' &&
+    (typeof slackMessage.sender_icon_url === 'string' ||
       slackMessage.sender_icon_url === undefined) &&
     slackMessage.image_urls instanceof Array &&
-    slackMessage.image_urls.every((url) => typeof url === "string") &&
-    typeof slackMessage.file_attached === "boolean" &&
-    typeof slackMessage.slack_team_id === "string" &&
-    typeof slackMessage.slack_team_domain === "string" &&
-    (typeof slackMessage.slack_team_icon_url === "string" ||
+    slackMessage.image_urls.every((url) => typeof url === 'string') &&
+    typeof slackMessage.file_attached === 'boolean' &&
+    typeof slackMessage.slack_team_id === 'string' &&
+    typeof slackMessage.slack_team_domain === 'string' &&
+    (typeof slackMessage.slack_team_icon_url === 'string' ||
       slackMessage.slack_team_icon_url === undefined) &&
-    typeof slackMessage.slack_team_name === "string" &&
-    typeof slackMessage.slack_user_id === "string" &&
-    typeof slackMessage.slack_sender_user_id === "string" &&
-    typeof slackMessage.slack_channel_id === "string" &&
-    typeof slackMessage.slack_channel_name === "string" &&
-    typeof slackMessage.slack_thread_ts === "string" &&
+    typeof slackMessage.slack_team_name === 'string' &&
+    typeof slackMessage.slack_user_id === 'string' &&
+    typeof slackMessage.slack_sender_user_id === 'string' &&
+    typeof slackMessage.slack_channel_id === 'string' &&
+    typeof slackMessage.slack_channel_name === 'string' &&
+    typeof slackMessage.slack_thread_ts === 'string' &&
     slackMessage.created_at instanceof Timestamp &&
     slackMessage.last_updated_at instanceof Timestamp
   );
@@ -126,7 +126,7 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
 
 export const getMessage = async (
   userId: string,
-  messageId: string
+  messageId: string,
 ): Promise<Message | null> => {
   const snapshot = await firestore
     .doc(messageDocument(userId, messageId))
@@ -144,7 +144,7 @@ export const getMessage = async (
 export const onReply = async ({
   userId,
   messageId,
-  reply
+  reply,
 }: {
   userId: string;
   messageId: string;
@@ -153,12 +153,12 @@ export const onReply = async ({
   const messageRef = firestore.doc(messageDocument(userId, messageId));
   const messageDoc = await messageRef.get();
   if (!messageDoc.exists) {
-    throw new Error("Message not found");
+    throw new Error('Message not found');
   }
   await messageRef.update({
     reply,
     replied: true,
-    last_updated_at: Timestamp.now()
+    last_updated_at: Timestamp.now(),
   });
 };
 
@@ -180,7 +180,7 @@ export const createSlackMessage = async ({
   slackSenderUserId,
   slackChannelId,
   slackChannelName,
-  slackThreadTs
+  slackThreadTs,
 }: {
   userId: string;
   message: string;
@@ -206,11 +206,11 @@ export const createSlackMessage = async ({
   const messageData: Message = {
     id: messageId,
     user_id: userId,
-    type: "slack",
+    type: 'slack',
     message,
     summary,
     bot_message: botMessage,
-    reply: "",
+    reply: '',
     sender_id: senderId,
     sender_name: senderName,
     sender_icon_url: senderIconUrl,
@@ -220,7 +220,7 @@ export const createSlackMessage = async ({
     archived: false,
     read: false,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now()
+    last_updated_at: Timestamp.now(),
   };
   const slackMessage: SlackMessage = {
     id,
@@ -244,7 +244,7 @@ export const createSlackMessage = async ({
     slack_channel_name: slackChannelName,
     slack_thread_ts: slackThreadTs,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now()
+    last_updated_at: Timestamp.now(),
   };
 
   const filteredMessageData = Object.entries(messageData)
@@ -267,7 +267,7 @@ export const createSlackMessage = async ({
 
 export const getSlackMessage = async (
   userId: string,
-  messageId: string
+  messageId: string,
 ): Promise<SlackMessage | null> => {
   const snapshot = await firestore
     .collection(slackMessageCollection(userId, messageId))

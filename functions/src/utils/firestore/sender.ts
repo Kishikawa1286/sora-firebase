@@ -1,7 +1,7 @@
-import { Timestamp } from "firebase-admin/firestore";
-import { firestore } from "../admin";
-import { MessageType } from "./message";
-import { userDocument } from "./user";
+import { Timestamp } from 'firebase-admin/firestore';
+import { firestore } from '../admin';
+import { MessageType } from './message';
+import { userDocument } from './user';
 
 const senderCollection = (userId: string) =>
   `${userDocument(userId)}/senders_v1`;
@@ -33,7 +33,7 @@ type SlackSender = {
   slack_team_id: string;
   slack_team_domain: string;
   slack_team_icon_url?: string;
-  slack_team_name: string
+  slack_team_name: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -45,7 +45,7 @@ const setSender = async ({
   id,
   senderName,
   type,
-  iconUrl
+  iconUrl,
 }: {
   userId: string;
   id: string;
@@ -57,11 +57,11 @@ const setSender = async ({
     id,
     sender_name: senderName,
     icon_url: iconUrl,
-    description: "",
+    description: '',
     type,
     group_ids: [],
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now()
+    last_updated_at: Timestamp.now(),
   };
 
   const filteredSender = Object.entries(sender)
@@ -80,7 +80,7 @@ export const setSlackSender = async ({
   slackTeamDomain,
   slackTeamIconUrl,
   slackTeamName,
-  iconUrl
+  iconUrl,
 }: {
   userId: string;
   id: string;
@@ -92,24 +92,24 @@ export const setSlackSender = async ({
   iconUrl?: string;
 }): Promise<SlackSender> => {
   await setSender({
-    id: senderId("slack", id),
+    id: senderId('slack', id),
     userId,
     senderName,
-    type: "slack",
-    iconUrl
+    type: 'slack',
+    iconUrl,
   });
   const slackSender: SlackSender = {
     id,
-    sender_id: senderId("slack", id),
+    sender_id: senderId('slack', id),
     sender_name: senderName,
     slack_team_id: slackTeamId,
     slack_team_domain: slackTeamDomain,
     slack_team_icon_url: slackTeamIconUrl,
     slack_team_name: slackTeamName,
     icon_url: iconUrl,
-    description: "",
+    description: '',
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now()
+    last_updated_at: Timestamp.now(),
   };
 
   const filteredSlackSender = Object.entries(slackSender)

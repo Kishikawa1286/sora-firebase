@@ -1,7 +1,7 @@
-import { getSlackMessage, onReply } from "../../../utils/firestore/message";
-import { functions128MB } from "../../../utils/functions";
-import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
-import { getRefreshedAccessToken } from "./get-refreshed-access-token";
+import { getSlackMessage, onReply } from '../../../utils/firestore/message';
+import { functions128MB } from '../../../utils/functions';
+import { replyToSlackThread } from '../../../utils/slack/reply-to-thread';
+import { getRefreshedAccessToken } from './get-refreshed-access-token';
 
 type SlackReplyData = {
   message_id: string;
@@ -11,7 +11,7 @@ type SlackReplyData = {
 export const slackReply = functions128MB.https.onCall(
   async (data: SlackReplyData, context) => {
     if (!context.auth) {
-      throw new Error("Unauthenticated");
+      throw new Error('Unauthenticated');
     }
 
     const userId = context.auth.uid;
@@ -23,20 +23,20 @@ export const slackReply = functions128MB.https.onCall(
     const message = await getSlackMessage(userId, messageId);
 
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error('Message not found');
     }
 
     await onReply({
       userId,
       messageId,
-      reply
+      reply,
     });
 
     await replyToSlackThread({
       accessToken,
       channel: message.slack_channel_id,
       threadTimestamp: message.slack_thread_ts,
-      text: reply
+      text: reply,
     });
-  }
+  },
 );
