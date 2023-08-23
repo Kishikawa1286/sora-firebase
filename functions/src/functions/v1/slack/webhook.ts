@@ -12,6 +12,8 @@ import {
 } from "../../../utils/firestore/slack-verification-code";
 import { setSlackUser } from "../../../utils/firestore/user";
 import { functions256MB } from "../../../utils/functions";
+import { generateNegativeChatReply } from "../../../utils/openai/generate-negative-reply";
+import { generatePositiveChatReply } from "../../../utils/openai/generate-positive-reply";
 import { summarize } from "../../../utils/openai/summarize";
 import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
 import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info";
@@ -31,7 +33,7 @@ import { getRefreshedAccessToken } from "./get-refreshed-access-token";
 
 const handleDirectMessage = async (
   accessToken: string,
-  event: IMMessageEvent,
+  event: IMMessageEvent
 ): Promise<void> => {
   const { team_id: teamId } = event;
   const { text, user: slackUserId, channel, ts: timestamp } = event.event;
@@ -47,8 +49,8 @@ const handleDirectMessage = async (
     throw new Error(
       `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
         "\n",
-        " ",
-      )}}`,
+        " "
+      )}}`
     );
   }
   const { domain, name, icon } = team;
@@ -56,8 +58,8 @@ const handleDirectMessage = async (
     throw new Error(
       `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
         "\n",
-        " ",
-      )}}`,
+        " "
+      )}}`
     );
   }
   const teamIconUrl = icon.image_132;
@@ -68,7 +70,7 @@ const handleDirectMessage = async (
   await setVerifiedSlackUser(
     teamId,
     verificationCodeData.app_user_id,
-    slackUserId,
+    slackUserId
   );
 
   await deleteSlackVerificationCode(verificationCodeData.id);
@@ -95,7 +97,7 @@ const handleDirectMessage = async (
 
 const handleChannelMessage = async (
   accessToken: string,
-  event: ChannelsMessageEvent | GroupsMessageEvent,
+  event: ChannelsMessageEvent | GroupsMessageEvent
 ) => {
   const { team_id: teamId } = event;
   const { text, user: slackUserId, channel, ts: timestamp } = event.event;
@@ -104,8 +106,8 @@ const handleChannelMessage = async (
   const verifiedUsers = (
     await Promise.all(
       mentionedUserIds.map((slackUserId) =>
-        getVerifiedSlackUser(teamId, slackUserId),
-      ),
+        getVerifiedSlackUser(teamId, slackUserId)
+      )
     )
   ).filter((user) => user !== null) as VerifiedSlackUser[];
 
@@ -118,8 +120,8 @@ const handleChannelMessage = async (
     throw new Error(
       `Missing data from Slack user info\n${JSON.stringify(senderInfo).replace(
         "\n",
-        " ",
-      )}`,
+        " "
+      )}`
     );
   }
 
@@ -131,8 +133,8 @@ const handleChannelMessage = async (
     throw new Error(
       `Missing data from Slack user info\n${JSON.stringify(senderInfo).replace(
         "\n",
-        " ",
-      )}`,
+        " "
+      )}`
     );
   }
 
@@ -148,8 +150,8 @@ const handleChannelMessage = async (
     throw new Error(
       `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
         "\n",
-        " ",
-      )}}`,
+        " "
+      )}}`
     );
   }
   const {
@@ -162,14 +164,16 @@ const handleChannelMessage = async (
     throw new Error(
       `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
         "\n",
-        " ",
-      )}}`,
+        " "
+      )}}`
     );
   }
 
   const summary = await summarize(text);
+  const positiveReply = await generatePositiveChatReply(text);
+  const negativeReply = await generateNegativeChatReply(text);
 
-  if (!summary) {
+  if (!summary || !positiveReply || !negativeReply) {
     throw new Error("Failed to summarize");
   }
 
@@ -215,9 +219,11 @@ const handleChannelMessage = async (
         slackSenderUserId: senderSlackUserId,
         slackChannelId: channel,
         slackChannelName: channelName,
-        slackThreadTs: timestamp
+        slackThreadTs: timestamp,
+        positiveReply,
+        negativeReply
       });
-    }),
+    })
   );
 };
 
@@ -251,8 +257,8 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
       const verifiedUsers = (
         await Promise.all(
           mentionedUserIds.map((slackUserId) =>
-            getVerifiedSlackUser(teamId, slackUserId),
-          ),
+            getVerifiedSlackUser(teamId, slackUserId)
+          )
         )
       ).filter((user) => user !== null) as VerifiedSlackUser[];
       console.log(verifiedUsers);

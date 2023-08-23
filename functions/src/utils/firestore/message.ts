@@ -14,7 +14,7 @@ const slackMessageCollection = (userId: string, messageId: string) =>
 const slackMessageDocument = (
   userId: string,
   messageId: string,
-  slackMessageId: string,
+  slackMessageId: string
 ) => `${slackMessageCollection(userId, messageId)}/${slackMessageId}`;
 
 type Message = {
@@ -33,6 +33,9 @@ type Message = {
   replied: boolean;
   archived: boolean;
   read: boolean;
+  is_schedule_aadjustment: boolean;
+  positive_reply: string;
+  negative_reply: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -60,6 +63,9 @@ const isMessage = (data: unknown): data is Message => {
     typeof message.replied === "boolean" &&
     typeof message.archived === "boolean" &&
     typeof message.read === "boolean" &&
+    typeof message.is_schedule_aadjustment === "boolean" &&
+    typeof message.positive_reply === "string" &&
+    typeof message.negative_reply === "string" &&
     message.created_at instanceof Timestamp &&
     message.last_updated_at instanceof Timestamp
   );
@@ -126,7 +132,7 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
 
 export const getMessage = async (
   userId: string,
-  messageId: string,
+  messageId: string
 ): Promise<Message | null> => {
   const snapshot = await firestore
     .doc(messageDocument(userId, messageId))
@@ -180,7 +186,9 @@ export const createSlackMessage = async ({
   slackSenderUserId,
   slackChannelId,
   slackChannelName,
-  slackThreadTs
+  slackThreadTs,
+  positiveReply,
+  negativeReply
 }: {
   userId: string;
   message: string;
@@ -200,6 +208,8 @@ export const createSlackMessage = async ({
   slackChannelId: string;
   slackChannelName: string;
   slackThreadTs: string;
+  positiveReply: string;
+  negativeReply: string;
 }): Promise<SlackMessage> => {
   const messageId = randomString(20);
   const id = randomString(20);
@@ -219,6 +229,10 @@ export const createSlackMessage = async ({
     replied: false,
     archived: false,
     read: false,
+    // TODO: is_schedule_aadjustment
+    is_schedule_aadjustment: false,
+    positive_reply: positiveReply,
+    negative_reply: negativeReply,
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
@@ -267,7 +281,7 @@ export const createSlackMessage = async ({
 
 export const getSlackMessage = async (
   userId: string,
-  messageId: string,
+  messageId: string
 ): Promise<SlackMessage | null> => {
   const snapshot = await firestore
     .collection(slackMessageCollection(userId, messageId))
