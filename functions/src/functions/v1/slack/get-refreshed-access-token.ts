@@ -1,8 +1,8 @@
 import {
   getSlackToken,
-  refreshSlackToken,
-} from '../../../utils/firestore/slack-token';
-import { refreshToken } from '../../../utils/slack/refresh-token';
+  refreshSlackToken
+} from "../../../utils/firestore/slack-token";
+import { refreshToken } from "../../../utils/slack/refresh-token";
 
 export const getRefreshedAccessToken = async (
   teamId: string,
@@ -28,14 +28,14 @@ export const getRefreshedAccessToken = async (
 
   // These variables are normally not undefined, but check them for linter
   if (!refreshedRefreshToken || !refreshedExpiresInSeconds) {
-    throw new Error('Missing data for token rotation');
+    throw new Error("Missing data for token rotation");
   }
 
   await refreshSlackToken({
     teamId: teamId,
     accessToken: refreshedAccessToken,
     expiresInSeconds: refreshedExpiresInSeconds,
-    refreshToken: refreshedRefreshToken,
+    refreshToken: refreshedRefreshToken
   });
 
   return refreshedAccessToken;

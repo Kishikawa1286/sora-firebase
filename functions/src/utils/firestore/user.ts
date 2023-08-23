@@ -1,7 +1,7 @@
-import { Timestamp } from 'firebase-admin/firestore';
-import { firestore } from '../admin';
+import { Timestamp } from "firebase-admin/firestore";
+import { firestore } from "../admin";
 
-const userCollection = 'users_v1';
+const userCollection = "users_v1";
 export const userDocument = (id: string) => `${userCollection}/${id}`;
 const slackUsersCollection = (userId: string) =>
   `${userDocument(userId)}/slack_users_v1`;
@@ -30,21 +30,21 @@ type SlackUser = {
 };
 
 const isSlackUser = (data: unknown): data is SlackUser => {
-  if (typeof data !== 'object' || data === null) {
+  if (typeof data !== "object" || data === null) {
     return false;
   }
   const slackUser = data as SlackUser;
   return (
-    typeof slackUser.id === 'string' &&
-    typeof slackUser.user_id === 'string' &&
-    typeof slackUser.slack_team_id === 'string' &&
-    typeof slackUser.slack_team_avatar_base_url === 'string' &&
-    typeof slackUser.slack_team_discoverable === 'string' &&
-    typeof slackUser.slack_team_domain === 'string' &&
-    (typeof slackUser.slack_team_icon_url === 'string' ||
+    typeof slackUser.id === "string" &&
+    typeof slackUser.user_id === "string" &&
+    typeof slackUser.slack_team_id === "string" &&
+    typeof slackUser.slack_team_avatar_base_url === "string" &&
+    typeof slackUser.slack_team_discoverable === "string" &&
+    typeof slackUser.slack_team_domain === "string" &&
+    (typeof slackUser.slack_team_icon_url === "string" ||
       slackUser.slack_team_icon_url === undefined) &&
-    typeof slackUser.slack_team_name === 'string' &&
-    typeof slackUser.language === 'string' &&
+    typeof slackUser.slack_team_name === "string" &&
+    typeof slackUser.language === "string" &&
     slackUser.created_at instanceof Timestamp &&
     slackUser.last_updated_at instanceof Timestamp
   );
@@ -52,7 +52,7 @@ const isSlackUser = (data: unknown): data is SlackUser => {
 
 export const createUser = async ({
   id,
-  email,
+  email
 }: {
   id: string;
   email?: string;
@@ -61,7 +61,7 @@ export const createUser = async ({
     id,
     email,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
 
   const filteredUser = Object.entries(user)
@@ -95,7 +95,7 @@ export const setSlackUser = async ({
   slackTeamDomain,
   slackTeamIconUrl,
   slackTeamName,
-  language,
+  language
 }: {
   userId: string;
   slackUserId: string;
@@ -118,7 +118,7 @@ export const setSlackUser = async ({
     slack_team_name: slackTeamName,
     language,
     created_at: Timestamp.now(),
-    last_updated_at: Timestamp.now(),
+    last_updated_at: Timestamp.now()
   };
 
   const filteredSlackUser = Object.entries(slackUser)
@@ -134,7 +134,7 @@ export const setSlackUser = async ({
 
 export const getSlackUser = async ({
   userId,
-  slackUserId,
+  slackUserId
 }: {
   userId: string;
   slackUserId: string;
@@ -152,7 +152,7 @@ export const getSlackUser = async ({
 
 export const deleteSlackUser = async ({
   userId,
-  slackUserId,
+  slackUserId
 }: {
   userId: string;
   slackUserId: string;
