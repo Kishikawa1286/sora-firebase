@@ -1,57 +1,38 @@
 {
-    "name": "sora-firebase",
-    "image": "mcr.microsoft.com/devcontainers/typescript-node:0-18-bullseye",
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {}
-    },
-    "postCreateCommand": "sh ./.devcontainer/postCreateCommand.sh",
-    "workspaceFolder": "/workspaces/sora-firebase",
-    "mounts": [
-        // Improve node_modules install performance
-        // https://code.visualstudio.com/remote/advancedcontainers/improve-performance#_use-a-targeted-named-volume
-        "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/functions/node_modules,type=volume"
-    ],
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "eslint.workingDirectories": [
-                    "./functions/"
-                ],
-                "editor.defaultFormatter": "esbenp.prettier-vscode",
-                "editor.formatOnSave": true,
-                "editor.codeActionsOnSave": {
-                    "source.fixAll.eslint": true,
-                    "source.organizeImports": true
-                },
-                "eslint.codeActionsOnSave.rules": [
-                    "!@typescript-eslint/*",
-                    "*"
-                ],
-                "typescript.tsdk": "functions/node_modules/typescript/lib",
-                "eslint.validate": [
-                    "javascript",
-                    "typescript"
-                ],
-                "files.exclude": {
-                    "**/.git": true,
-                    "**/.svn": true,
-                    "**/.hg": true,
-                    "**/CVS": true,
-                    "**/.DS_Store": true,
-                    "**/node_modules": false,
-                    "**/.pnpm-store": false
-                },
-                "typescript.enablePromptUseWorkspaceTsdk": true,
-                "[typescript]": {
-                    "editor.tabSize": 2
-                }
-            },
-            "extensions": [
-				"dbaeumer.vscode-eslint",
-				"christian-kohler.npm-intellisense",
-				"unional.vscode-sort-package-json",
-				"esbenp.prettier-vscode"
-			]
+  "name": "sora-firebase",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:0-18-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "postCreateCommand": "sh ./.devcontainer/postCreateCommand.sh",
+  "workspaceFolder": "/workspaces/sora-firebase",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-functions-node_modules,target=${containerWorkspaceFolder}/functions/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-hosting-node_modules,target=${containerWorkspaceFolder}/hosting/node_modules,type=volume"
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "eslint.workingDirectories": [
+          { "mode": "auto" }
+        ],
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true,
+          "source.organizeImports": true
+        },
+        "eslint.codeActionsOnSave.rules": ["!@typescript-eslint/*", "*"],
+        "[typescript]": {
+          "editor.tabSize": 2
         }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "christian-kohler.npm-intellisense",
+        "unional.vscode-sort-package-json",
+        "esbenp.prettier-vscode"
+      ]
     }
+  }
 }

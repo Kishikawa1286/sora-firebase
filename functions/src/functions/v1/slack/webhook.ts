@@ -1,17 +1,14 @@
+import { FIREBASE_HOSTING_URL } from "../../../utils/env";
 import { createSlackMessage } from "../../../utils/firestore/message";
 import { setSlackSender } from "../../../utils/firestore/sender";
 import {
   getSlackToken,
   getVerifiedSlackUser,
-  setVerifiedSlackUser,
   VerifiedSlackUser
 } from "../../../utils/firestore/slack-token";
-import {
-  deleteSlackVerificationCode,
-  searchSlackVerificationCodeByCode
-} from "../../../utils/firestore/slack-verification-code";
-import { setSlackUser } from "../../../utils/firestore/user";
+import { createSlackVerificationCode } from "../../../utils/firestore/slack-verification-code";
 import { functions256MB } from "../../../utils/functions";
+import { generateUrlWithParams } from "../../../utils/generate-url-with-parans";
 import { generateNegativeChatReply } from "../../../utils/openai/generate-negative-reply";
 import { generatePositiveChatReply } from "../../../utils/openai/generate-positive-reply";
 import { summarize } from "../../../utils/openai/summarize";
@@ -36,62 +33,32 @@ const handleDirectMessage = async (
   event: IMMessageEvent
 ): Promise<void> => {
   const { team_id: teamId } = event;
-  const { text, user: slackUserId, channel, ts: timestamp } = event.event;
-  const verificationCodeData = await searchSlackVerificationCodeByCode(text);
-  const isCodeExists = verificationCodeData !== null;
-  if (!isCodeExists) {
+  const { user: slackUserId, channel, ts: timestamp } = event.event;
+
+  const user = await getVerifiedSlackUser(teamId, slackUserId);
+  if (user) {
+    await replyToSlackThread({
+      accessToken,
+      channel: channel,
+      threadTimestamp: timestamp,
+      text: "いつもご利用ありがとうございます！すでに認証されています。"
+    });
     return;
   }
 
-  const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
-  const { team } = teamInfoRes;
-  if (!team) {
-    throw new Error(
-      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
-        "\n",
-        " "
-      )}}`
-    );
-  }
-  const { domain, name, icon } = team;
-  if (!domain || !name || !icon) {
-    throw new Error(
-      `Failed to fetch Slack team info\n${JSON.stringify(teamInfoRes).replace(
-        "\n",
-        " "
-      )}}`
-    );
-  }
-  const teamIconUrl = icon.image_132;
-  if (!teamIconUrl) {
-    throw new Error("Missing team icon URL");
-  }
-
-  await setVerifiedSlackUser(
-    teamId,
-    verificationCodeData.app_user_id,
-    slackUserId
-  );
-
-  await deleteSlackVerificationCode(verificationCodeData.id);
-
-  await setSlackUser({
-    userId: verificationCodeData.app_user_id,
-    slackUserId: slackUserId,
-    slackTeamId: teamId,
-    slackTeamAvatarBaseUrl: team.avatar_base_url,
-    slackTeamDiscoverable: team.discoverable,
-    slackTeamDomain: domain,
-    slackTeamIconUrl: teamIconUrl,
-    slackTeamName: name,
-    language: verificationCodeData.language
+  const verificationCode = await createSlackVerificationCode({
+    slackUserId,
+    slackTeamId: teamId
+  });
+  const verificationUrl = generateUrlWithParams(FIREBASE_HOSTING_URL, {
+    code: verificationCode.code
   });
 
   await replyToSlackThread({
     accessToken,
     channel: channel,
     threadTimestamp: timestamp,
-    text: "認証されました！"
+    text: `こちらの認証URLから認証を完了してください。\n\n${verificationUrl}`
   });
 };
 
