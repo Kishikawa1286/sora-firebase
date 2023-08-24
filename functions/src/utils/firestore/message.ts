@@ -33,7 +33,7 @@ type Message = {
   replied: boolean;
   archived: boolean;
   read: boolean;
-  is_schedule_aadjustment: boolean;
+  is_schedule_adjustment: boolean;
   positive_reply: string;
   negative_reply: string;
   created_at: Timestamp;
@@ -63,7 +63,7 @@ const isMessage = (data: unknown): data is Message => {
     typeof message.replied === "boolean" &&
     typeof message.archived === "boolean" &&
     typeof message.read === "boolean" &&
-    typeof message.is_schedule_aadjustment === "boolean" &&
+    typeof message.is_schedule_adjustment === "boolean" &&
     typeof message.positive_reply === "string" &&
     typeof message.negative_reply === "string" &&
     message.created_at instanceof Timestamp &&
@@ -229,8 +229,8 @@ export const createSlackMessage = async ({
     replied: false,
     archived: false,
     read: false,
-    // TODO: is_schedule_aadjustment
-    is_schedule_aadjustment: false,
+    // TODO: is_schedule_adjustment
+    is_schedule_adjustment: false,
     positive_reply: positiveReply,
     negative_reply: negativeReply,
     created_at: Timestamp.now(),
