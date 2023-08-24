@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.8.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="レイヤー_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" viewBox="0 0 47.5 48.8" style="enable-background:new 0 0 47.5 48.8;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;stroke:#01619D;stroke-width:3;stroke-linejoin:round;}
+	.st1{fill:#01619D;}
+	.st2{fill:none;stroke:#01619D;}
+	.st3{fill:#6FD1C9;}
+	.st4{fill:#E5DC9B;}
+	.st5{fill:#FFFFFF;}
+	.st6{fill:none;stroke:#6ED1C8;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+	.st7{font-family:'NotoSansJP-ExtraBold';}
+	.st8{font-size:8px;}
+</style>
+<g id="グループ_49" transform="translate(1.5 1.5)">
+	<g id="グループ_18" transform="translate(0 0)">
+		<path id="合体_1" class="st0" d="M12.2,32c-1.9,0-3.5-1.6-3.5-3.5v-3.2C1.2,23.7,0,15.6,0,15.6s2.2,2.8,8.7,3.9v-8.3
+			c0-1.9,1.6-3.5,3.5-3.5h2.1l2.8-7c0.2-0.5,0.8-0.8,1.3-0.6c0.3,0.1,0.5,0.3,0.6,0.6l2.8,7h8.8l2.8-7c0.2-0.5,0.8-0.8,1.3-0.6
+			c0.3,0.1,0.5,0.3,0.6,0.6l2.8,7H41c1.9,0,3.5,1.6,3.5,3.5c0,0,0,0,0,0v17.4c0,1.9-1.6,3.5-3.5,3.5L12.2,32z"/>
+		<g id="楕円形_1" transform="translate(17.272 14.565)">
+			<circle class="st1" cx="1.6" cy="1.6" r="1.6"/>
+			<circle class="st2" cx="1.6" cy="1.6" r="1.1"/>
+		</g>
+		<g id="楕円形_2" transform="translate(31.903 14.565)">
+			<circle class="st1" cx="1.6" cy="1.6" r="1.6"/>
+			<circle class="st2" cx="1.6" cy="1.6" r="1.4"/>
+		</g>
+		<g id="多角形_3" transform="translate(29.465 21.068) rotate(180)">
+			<path class="st1" d="M4.1,2.8H2.4C2.1,2.8,2,2.5,2,2.4c0-0.1-0.1-0.3,0.1-0.5l0.8-0.8C3,1,3.1,0.9,3.3,0.9S3.5,1,3.6,1.1l0.8,0.8
+				c0.2,0.2,0.1,0.5,0.1,0.5C4.5,2.5,4.4,2.8,4.1,2.8z"/>
+			<path class="st1" d="M3.3,1.4L2.4,2.3h1.7L3.3,1.4C3.3,1.4,3.3,1.4,3.3,1.4L3.3,1.4 M3.3,0.4c0.3,0,0.5,0.1,0.7,0.3l0.8,0.8
+				C5.4,2.2,5,3.3,4.1,3.3H2.4c-0.9,0-1.3-1.1-0.7-1.7l0.8-0.8C2.7,0.5,3,0.4,3.3,0.4z"/>
+		</g>
+		<g id="長方形_12" transform="translate(8.839 25.945)">
+			<path class="st3" d="M0,0h35l0,0v3.5c0,1.7-1.3,3-3,3H3c-1.7,0-3-1.3-3-3V0L0,0z"/>
+			<path class="st2" d="M0.5,0.5h34l0,0v3C34.5,4.9,33.3,6,32,6H3C1.6,6,0.5,4.9,0.5,3.5V0.5L0.5,0.5z"/>
+		</g>
+		<g id="グループ_19" transform="translate(22.658 29.196)">
+			<g id="パス_5">
+				<path class="st4" d="M3.3,6C1.7,6,0.5,4.8,0.5,3.3s1.2-2.8,2.8-2.8S6,1.7,6,3.3S4.8,6,3.3,6z"/>
+				<path class="st1" d="M3.3,1C2,1,1,2,1,3.3s1,2.3,2.3,2.3s2.3-1,2.3-2.3S4.5,1,3.3,1 M3.3,0C5,0,6.5,1.5,6.5,3.3S5,6.5,3.3,6.5
+					S0,5,0,3.3S1.5,0,3.3,0z"/>
+			</g>
+			<path id="パス_2" class="st2" d="M0.6,2.3h5.3"/>
+			<path id="パス_3" class="st2" d="M3.3,2.3v2.9"/>
+			<g id="パス_4" transform="translate(2.439 4.877)">
+				<path class="st5" d="M0.8,1.1C0.6,1.1,0.5,1,0.5,0.8s0.1-0.3,0.3-0.3s0.3,0.1,0.3,0.3S1,1.1,0.8,1.1z"/>
+				<path class="st1" d="M0.8,0c0.4,0,0.8,0.4,0.8,0.8S1.3,1.6,0.8,1.6S0,1.3,0,0.8S0.4,0,0.8,0z"/>
+			</g>
+		</g>
+		<path id="パス_6" class="st6" d="M8,12.1h16.3l-1.6,10.6H10.2L8,12.1z"/>
+		<path id="パス_7" class="st6" d="M43.8,12.1H28.2l1.5,10.6h12.1L43.8,12.1z"/>
+	</g>
+	<text transform="matrix(1 0 0 1 10.16 45.292)" class="st1 st7 st8">Message</text>
+</g>
+</svg>
