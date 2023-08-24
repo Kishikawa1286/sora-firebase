@@ -1,18 +1,32 @@
+import { useEffect } from "react";
 import { atom, selector, useRecoilState } from "recoil";
 import {
-  authenticateSlackUserWithApple,
+  signInWithEmail as _signInWithEmail,
+  authenticateWithCode,
   onAuthStateChanged
-} from "../repositories/auth-repository";
+} from "../repositories/auth-repository/auth-repository";
 import { ViewModel } from "../utils/view-model";
 
 type AuthenticationPageViewModel = {
   authenticated: boolean;
+  email: string;
+  password: string;
   errorMessage: string | null;
 };
 
 const authenticatedAtom = atom<boolean>({
   key: "authenticationPageModel-authenticated",
   default: false
+});
+
+const emailAtom = atom<string>({
+  key: "authenticationPageModel-email",
+  default: ""
+});
+
+const passwordAtom = atom<string>({
+  key: "authenticationPageModel-password",
+  default: ""
 });
 
 const errorMessageAtom = atom<string | null>({
@@ -23,10 +37,19 @@ const errorMessageAtom = atom<string | null>({
 const authenticatedSelector = selector<boolean>({
   key: "authenticationPageViewModel-authenticated",
   get: ({ get }) => get(authenticatedAtom),
-  set: async ({ set }) =>
-    onAuthStateChanged((user) => {
-      set(authenticatedAtom, user !== null);
-    })
+  set: ({ set }, authenticated) => set(authenticatedAtom, authenticated)
+});
+
+const emailSelector = selector<string>({
+  key: "authenticationPageViewModel-email",
+  get: ({ get }) => get(emailAtom),
+  set: ({ set }, email) => set(emailAtom, email)
+});
+
+const passwordSelector = selector<string>({
+  key: "authenticationPageViewModel-password",
+  get: ({ get }) => get(passwordAtom),
+  set: ({ set }, password) => set(passwordAtom, password)
 });
 
 const errorMessageSelector = selector<string | null>({
@@ -40,26 +63,40 @@ export const useAuthenticationPageViewModel =
     const [authenticated, setAuthenticated] = useRecoilState(
       authenticatedSelector
     );
+    const [email, setEmail] = useRecoilState(emailSelector);
+    const [password, setPassword] = useRecoilState(passwordSelector);
     const [errorMessage, setErrorMessage] =
       useRecoilState(errorMessageSelector);
 
-    const signInWithApple = async () => {
-      const result = await authenticateSlackUserWithApple();
+    useEffect(() => {
+      onAuthStateChanged(async (user) => {
+        if (user) {
+          await authenticateWithCode();
+          setAuthenticated(true);
+        }
+      });
+    });
+
+    const signInWithEmail = async () => {
+      const result = await _signInWithEmail(email, password);
       if (!result.success) {
         setErrorMessage(result.errorMessage);
         return;
       }
-      setAuthenticated(true);
       setErrorMessage(null);
     };
 
     return {
       state: {
         authenticated,
+        email,
+        password,
         errorMessage
       },
       actions: {
-        signInWithApple
+        signInWithEmail,
+        setEmail,
+        setPassword
       }
     };
   };

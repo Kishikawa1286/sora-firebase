@@ -2,8 +2,8 @@ import { setVerifiedSlackUser } from "../../../utils/firestore/slack-token";
 import { searchSlackVerificationCodeByCode } from "../../../utils/firestore/slack-verification-code";
 import { setSlackUser } from "../../../utils/firestore/user";
 import { functions256MB } from "../../../utils/functions";
-import { fetchSlackAccessToken } from "../../../utils/slack/fetch-access-token";
 import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
+import { getRefreshedAccessToken } from "./get-refreshed-access-token";
 
 // TODO: define exception type
 export const verifySlackCode = functions256MB.https.onCall(
@@ -27,13 +27,7 @@ export const verifySlackCode = functions256MB.https.onCall(
     const { slack_user_id: slackUserId, slack_team_id: teamId } =
       verificationCodeData;
 
-    const accessTokenData = await fetchSlackAccessToken(code);
-
-    const { access_token: accessToken } = accessTokenData;
-
-    if (!accessToken) {
-      throw new Error("Missing data from Slack API");
-    }
+    const accessToken = await getRefreshedAccessToken(teamId);
 
     const teamInfoRes = await fetchTeamInfo(accessToken, teamId);
     if (!teamInfoRes.ok) {

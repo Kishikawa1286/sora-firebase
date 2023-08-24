@@ -1,6 +1,13 @@
-import { Alert, Box, Card, Container, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  Container,
+  TextField,
+  Typography
+} from "@mui/material";
 import React from "react";
-import { AppleLoginButton } from "react-social-login-buttons";
 import { useAuthenticationPageViewModel } from "./states";
 
 const AuthenticationPage: React.FC<object> = () => {
@@ -23,13 +30,14 @@ const AuthenticationPage: React.FC<object> = () => {
         <Box
           display="flex"
           flexDirection="column"
-          alignItems="center"
+          alignItems="center" // 横方向の中央寄せ
+          justifyContent="center" // 縦方向の中央寄せ
           padding={4}
         >
           {viewModel.state.authenticated ? (
             <div>
-              <Typography variant="h6" gutterBottom>
-                認証されました
+              <Typography variant="body1" gutterBottom>
+                認証が完了しました！
               </Typography>
             </div>
           ) : (
@@ -37,10 +45,36 @@ const AuthenticationPage: React.FC<object> = () => {
               <Typography variant="h6" gutterBottom>
                 Sora
               </Typography>
-              <AppleLoginButton
-                text="Appleでサインイン"
-                onClick={viewModel.actions.signInWithApple}
+              <Typography variant="body1" gutterBottom>
+                ログインしてSoraに追加するSNSアカウントの認証を行います。
+              </Typography>
+              <TextField
+                variant="outlined"
+                margin="dense"
+                required
+                fullWidth
+                label="メールアドレス"
+                value={viewModel.state.email}
+                onChange={(e) => viewModel.actions.setEmail(e.target.value)}
               />
+              <TextField
+                variant="outlined"
+                margin="dense"
+                required
+                fullWidth
+                label="パスワード"
+                type="password"
+                value={viewModel.state.password}
+                onChange={(e) => viewModel.actions.setPassword(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={viewModel.actions.signInWithEmail}
+                style={{ marginTop: 20 }}
+              >
+                メールでサインイン
+              </Button>
               {viewModel.state.errorMessage && (
                 <Alert severity="error" style={{ marginTop: 16 }}>
                   {viewModel.state.errorMessage}

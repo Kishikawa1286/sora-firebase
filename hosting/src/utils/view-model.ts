@@ -1,4 +1,5 @@
 export type ViewModel<T> = {
   state: T;
-  actions: Record<string, () => Promise<void> | void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actions: Record<string, (...args: any[]) => Promise<void> | void>;
 };
