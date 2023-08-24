@@ -1,0 +1,12 @@
+{
+  "eslint.workingDirectories": [
+    { "directory": "/workspaces/sora-firebase/functions", "changeProcessCWD": true }
+  ],
+  "typescript.tsdk": "/workspaces/sora-firebase/functions/node_modules/typescript/lib",
+  "eslint.validate": ["javascript", "typescript"],
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.options": {
+    "configFile": "/workspaces/sora-firebase/functions/.eslintrc.cjs"
+  },
+  "prettier.configPath": "/workspaces/sora-firebase/functions/prettier.config.cjs"
+}
