@@ -1,7 +1,7 @@
 import { singleCompletion } from "./openai";
 
 const systemMessage =
-  "メッセージの内容からタイトルを作ってください。受け取った人が取るべき行動を含めてください。";
+  "メッセージの内容からタイトルを作ってください。頼まれている行動を【】に含めてください。";
 
 const examples = [
   {

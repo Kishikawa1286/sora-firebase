@@ -1,6 +1,5 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
-import { randomString } from "../random-string";
 import { isMessageEvent, MessageEvent } from "../slack/types/message-events";
 
 export const slackEventCollection = "slack_events_v1";
@@ -14,8 +13,16 @@ type SlackEvent = {
   last_updated_at: Timestamp;
 };
 
-export const saveSlackEvent = async (event: MessageEvent) => {
-  const id = randomString(16);
+export const saveSlackEvent = async (
+  event: MessageEvent
+): Promise<{ exists: boolean }> => {
+  const id = `${event.team_id}:${event.event.channel}:${event.event.ts}`;
+
+  const ref = firestore.doc(slackEventDocument(id));
+
+  if ((await ref.get()).exists) {
+    return { exists: true };
+  }
 
   const slackEvent: SlackEvent = {
     id,
@@ -26,7 +33,7 @@ export const saveSlackEvent = async (event: MessageEvent) => {
 
   await firestore.doc(slackEventDocument(id)).create(slackEvent);
 
-  return slackEvent;
+  return { exists: false };
 };
 
 export const getSlackEvent = async (

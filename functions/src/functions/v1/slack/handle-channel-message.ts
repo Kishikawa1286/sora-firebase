@@ -99,7 +99,7 @@ export const handleChannelMessage = async (
     throw new Error("Failed to summarize");
   }
 
-  const botMessage = `あなたのメッセージと以下の要約を送信しました。\n\n ${summary} `;
+  const botMessage = `あなたのメッセージを以下のタイトルで送信しました。\n\n ${summary} `;
 
   await replyToSlackThread({
     accessToken,
