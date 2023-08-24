@@ -2,13 +2,8 @@ import {
   getSlackEvent,
   slackEventCollection
 } from "../../../utils/firestore/slack-event";
-import {
-  VerifiedSlackUser,
-  getSlackToken,
-  getVerifiedSlackUser
-} from "../../../utils/firestore/slack-token";
+import { getSlackToken } from "../../../utils/firestore/slack-token";
 import { functions512MB } from "../../../utils/functions";
-import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
 import {
   isChannelsMessageEvent,
   isGroupsMessageEvent,
@@ -39,18 +34,6 @@ export const onSaveSlackEvent = functions512MB.firestore
     const accessToken = await getRefreshedAccessToken(teamId);
 
     if (isIMMessageEvent(messageEvent)) {
-      const mentionedUserIds = extractSlackMentions(event.text);
-      const verifiedUsers = (
-        await Promise.all(
-          mentionedUserIds.map((slackUserId) =>
-            getVerifiedSlackUser(teamId, slackUserId)
-          )
-        )
-      ).filter((user) => user !== null) as VerifiedSlackUser[];
-      if (verifiedUsers.length === 0) {
-        return;
-      }
-
       await handleDirectMessage(accessToken, messageEvent);
     } else if (isChannelsMessageEvent(messageEvent)) {
       await handleChannelMessage(accessToken, messageEvent);

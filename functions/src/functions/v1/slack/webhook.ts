@@ -1,7 +1,8 @@
 import { saveSlackEvent } from "../../../utils/firestore/slack-event";
-import { getSlackToken } from "../../../utils/firestore/slack-token";
 import { functions256MB } from "../../../utils/functions";
+import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 import { isMessageEvent } from "../../../utils/slack/types/message-events";
+import { getRefreshedAccessToken } from "./get-refreshed-access-token";
 
 export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
@@ -18,13 +19,18 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
     }
 
     const { team_id: teamId, event } = body;
-    const { user: slackUserId } = event;
-    const tokenData = await getSlackToken(teamId);
-    if (slackUserId === tokenData.bot_user_id) {
-      return;
-    }
+    const { channel, ts: timestamp } = event;
 
     await saveSlackEvent(body);
+
+    const accessToken = await getRefreshedAccessToken(teamId);
+
+    await replyToSlackThread({
+      accessToken,
+      channel: channel,
+      threadTimestamp: timestamp,
+      text: "Soraがメッセージを処理しています。"
+    });
 
     res.status(200).send("Success");
   } catch (error) {
