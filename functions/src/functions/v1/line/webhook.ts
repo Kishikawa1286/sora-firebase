@@ -19,14 +19,13 @@ const replyWebhookEvent = async (event: WebhookEvent) => {
   }
 
   const groupId = event.source.groupId;
-  if (event.source.userId !== undefined) {
-    const memberProfile = await lineClient.getGroupMemberProfile(
-      groupId,
-      event.source.userId
-    );
-    lineClient.replyMessage(event.replyToken, {
-      type: "text",
-      text: JSON.stringify(memberProfile)
-    });
-  }
+  const userId = event.source.userId;
+  if (!userId) return;
+
+  const memberProfile = await lineClient.getGroupMemberProfile(groupId, userId);
+  console.log(memberProfile);
+  lineClient.replyMessage(event.replyToken, {
+    type: "text",
+    text: JSON.stringify(memberProfile)
+  });
 };
