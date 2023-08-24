@@ -18,4 +18,4 @@ export const callFirebaseFunction = async <T, S>(
   return res;
 };
 
-type FunctionName = "v1-slack-authenticate_channel";
+type FunctionName = "v1-slack-verify_code";

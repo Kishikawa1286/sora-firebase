@@ -54,7 +54,7 @@ export const authenticateSlackUserWithApple =
         };
       }
 
-      await callFirebaseFunction("v1-slack-authenticate_channel", {
+      await callFirebaseFunction("v1-slack-verify_code", {
         code: authenticationCode
       });
 
