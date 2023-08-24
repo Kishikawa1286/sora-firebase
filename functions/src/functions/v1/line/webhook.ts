@@ -6,9 +6,6 @@ import {
 } from "../../../utils/env";
 import { functions128MB } from "../../../utils/functions";
 
-/**
- * Hello World関数
- */
 export const lineWebhook = functions128MB.https.onRequest(async (req, res) => {
   const client = new Client({
     channelAccessToken: LINE_CHANNEL_ACCESS_TOKEN,
