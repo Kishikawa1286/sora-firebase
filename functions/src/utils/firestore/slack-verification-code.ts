@@ -8,8 +8,9 @@ const slackVerificationCodeDocument = (id: string) =>
 
 type SlackVerificationCode = {
   id: string;
-  app_user_id: string;
   code: string;
+  slack_user_id: string;
+  slack_team_id: string;
   expires_at: Timestamp;
   language: string;
   created_at: Timestamp;
@@ -17,7 +18,7 @@ type SlackVerificationCode = {
 };
 
 const isSlackVerificationCode = (
-  data: unknown,
+  data: unknown
 ): data is SlackVerificationCode => {
   if (typeof data !== "object" || data === null) {
     return false;
@@ -25,7 +26,8 @@ const isSlackVerificationCode = (
   const slackVerificationCode = data as SlackVerificationCode;
   return (
     typeof slackVerificationCode.id === "string" &&
-    typeof slackVerificationCode.app_user_id === "string" &&
+    typeof slackVerificationCode.slack_user_id === "string" &&
+    typeof slackVerificationCode.slack_team_id === "string" &&
     typeof slackVerificationCode.code === "string" &&
     slackVerificationCode.expires_at instanceof Timestamp &&
     typeof slackVerificationCode.language === "string" &&
@@ -34,16 +36,21 @@ const isSlackVerificationCode = (
   );
 };
 
-export const createSlackVerificationCode = async (
-  appUserId: string,
-): Promise<SlackVerificationCode> => {
+export const createSlackVerificationCode = async ({
+  slackUserId,
+  slackTeamId
+}: {
+  slackUserId: string;
+  slackTeamId: string;
+}): Promise<SlackVerificationCode> => {
   const id = randomString(20);
   const code = randomString(16);
   // Expires in 24 hours
   const expiresAt = Timestamp.fromMillis(Date.now() + 1000 * 60 * 60 * 24);
   const slackVerificationCode: SlackVerificationCode = {
     id,
-    app_user_id: appUserId,
+    slack_user_id: slackUserId,
+    slack_team_id: slackTeamId,
     code,
     expires_at: expiresAt,
     language: "jp",
@@ -57,7 +64,7 @@ export const createSlackVerificationCode = async (
 };
 
 export const searchSlackVerificationCodeByCode = async (
-  code: string,
+  code: string
 ): Promise<SlackVerificationCode | null> => {
   const snapshot = await firestore
     .collection(slackVerificationCodesCollection)
@@ -75,7 +82,7 @@ export const searchSlackVerificationCodeByCode = async (
 };
 
 export const deleteSlackVerificationCode = async (
-  id: string,
+  id: string
 ): Promise<void> => {
   await firestore.doc(slackVerificationCodeDocument(id)).delete();
 };
