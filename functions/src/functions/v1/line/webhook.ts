@@ -1,17 +1,29 @@
 import { WebhookEvent } from "@line/bot-sdk/lib/types";
 import axios from "axios";
+import { logger } from "firebase-functions/v1";
 import { LINE_CHANNEL_ACCESS_TOKEN } from "../../../utils/env";
 import { functions128MB } from "../../../utils/functions";
 
 export const lineWebhook = functions128MB.https.onRequest(async (req, res) => {
-  await Promise.all(
-    req.body.events.map((event: WebhookEvent) => replyWebhookEvent(event))
-  );
+  // logger.info("called lineWebhook function");
+  // logger.info("request body", req.body);
+  // logger.info("request body events", req.body.events);
+  try {
+    await Promise.all(
+      req.body.events.map((event: WebhookEvent) => replyWebhookEvent(event))
+    );
 
-  res.status(200).send();
+    res.status(200).send();
+  } catch (e) {
+    logger.error(e);
+  }
 });
 
 const replyWebhookEvent = async (event: WebhookEvent) => {
+  // logger.info("event", event);
+  // logger.info("event type", event.type);
+  // logger.info("event source type", event.source.type);
+
   if (
     event.type !== "message" ||
     event.message.type !== "text" ||
@@ -38,13 +50,4 @@ const replyWebhookEvent = async (event: WebhookEvent) => {
     .catch((error) => {
       console.error("Error:", error);
     });
-  // const groupProfile = await lineClient.getGroupSummary(groupId);
-  // console.log(groupProfile);
-
-  // const memberProfile = await lineClient.getGroupMemberProfile(groupId, userId);
-  // console.log(memberProfile);
-  // lineClient.replyMessage(event.replyToken, {
-  //   type: "text",
-  //   text: JSON.stringify(memberProfile)
-  // });
 };
