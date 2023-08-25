@@ -19,12 +19,14 @@ export const slackReply = functions128MB.https.onCall(
     const { message_id, reply } = data;
     const messageId = message_id;
 
-    const accessToken = await getRefreshedAccessToken(userId);
     const message = await getSlackMessage(userId, messageId);
 
     if (!message) {
       throw new Error("Message not found");
     }
+
+    const { slack_team_id: teamId } = message;
+    const accessToken = await getRefreshedAccessToken(teamId);
 
     await onReply({
       userId,
@@ -38,5 +40,5 @@ export const slackReply = functions128MB.https.onCall(
       threadTimestamp: message.slack_thread_ts,
       text: reply
     });
-  },
+  }
 );
