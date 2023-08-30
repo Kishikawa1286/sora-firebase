@@ -93,6 +93,7 @@ type SlackMessage = {
   slack_channel_name: string;
   slack_ts: string;
   slack_thread_ts?: string;
+  event: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -128,6 +129,7 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
     typeof slackMessage.slack_ts === "string" &&
     (typeof slackMessage.slack_thread_ts === "string" ||
       slackMessage.slack_thread_ts === undefined) &&
+    typeof slackMessage.event === "string" &&
     slackMessage.created_at instanceof Timestamp &&
     slackMessage.last_updated_at instanceof Timestamp
   );
@@ -191,6 +193,7 @@ export const createSlackMessage = async ({
   slackChannelName,
   slackThreadTs,
   slackTs,
+  event,
   positiveReply,
   negativeReply
 }: {
@@ -213,6 +216,7 @@ export const createSlackMessage = async ({
   slackChannelName: string;
   slackThreadTs?: string;
   slackTs: string;
+  event: MessageEvent;
   positiveReply: string;
   negativeReply: string;
 }): Promise<SlackMessage> => {
@@ -263,6 +267,7 @@ export const createSlackMessage = async ({
     slack_channel_name: slackChannelName,
     slack_ts: slackTs,
     slack_thread_ts: slackThreadTs,
+    event: JSON.stringify(event),
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
