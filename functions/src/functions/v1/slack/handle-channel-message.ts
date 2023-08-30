@@ -7,6 +7,7 @@ import {
 import { generateNegativeChatReply } from "../../../utils/openai/generate-negative-reply";
 import { generatePositiveChatReply } from "../../../utils/openai/generate-positive-reply";
 import { summarize } from "../../../utils/openai/summarize";
+import { addSlackReaction } from "../../../utils/slack/add-reaction";
 import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
 import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info";
 import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
@@ -36,6 +37,13 @@ export const handleChannelMessage = async (
   if (verifiedUsers.length === 0) {
     return;
   }
+
+  await addSlackReaction({
+    accessToken,
+    channel: channel,
+    threadTimestamp: timestamp,
+    reactionName: "dog"
+  });
 
   const senderInfo = await fetchUserInfo(accessToken, slackUserId);
   if (!senderInfo.ok) {
