@@ -31,6 +31,7 @@ export type AppHomeMessageEvent = {
     user: string;
     text: string;
     ts: string;
+    thread_ts?: string;
     channel: string;
     event_ts: string;
     channel_type: "app_home";
@@ -42,7 +43,7 @@ export type AppHomeMessageEvent = {
 };
 
 export const isAppHomeMessageEvent = (
-  event: MessageEvent,
+  event: MessageEvent
 ): event is AppHomeMessageEvent => event.event.channel_type === "app_home";
 
 // See: https://api.slack.com/events/message.channels
@@ -56,6 +57,7 @@ export type ChannelsMessageEvent = {
     user: string;
     text: string;
     ts: string;
+    thread_ts?: string;
     event_ts: string;
     channel_type: "channel";
   };
@@ -66,7 +68,7 @@ export type ChannelsMessageEvent = {
 };
 
 export const isChannelsMessageEvent = (
-  event: MessageEvent,
+  event: MessageEvent
 ): event is ChannelsMessageEvent => event.event.channel_type === "channel";
 
 // See: https://api.slack.com/events/message.groups
@@ -80,6 +82,7 @@ export type GroupsMessageEvent = {
     user: string;
     text: string;
     ts: string;
+    thread_ts?: string;
     event_ts: string;
     channel_type: "group";
   };
@@ -90,7 +93,7 @@ export type GroupsMessageEvent = {
 };
 
 export const isGroupsMessageEvent = (
-  event: MessageEvent,
+  event: MessageEvent
 ): event is GroupsMessageEvent => event.event.channel_type === "group";
 
 // See: https://api.slack.com/events/message.im
@@ -104,6 +107,7 @@ export type IMMessageEvent = {
     user: string;
     text: string;
     ts: string;
+    thread_ts?: string;
     event_ts: string;
     channel_type: "im";
   };
@@ -114,7 +118,7 @@ export type IMMessageEvent = {
 };
 
 export const isIMMessageEvent = (
-  event: MessageEvent,
+  event: MessageEvent
 ): event is IMMessageEvent => event.event.channel_type === "im";
 
 // See: https://api.slack.com/events/message.mpim
@@ -128,6 +132,7 @@ export type MPIMMessageEvent = {
     user: string;
     text: string;
     ts: string;
+    thread_ts?: string;
     event_ts: string;
     channel_type: "mpim";
   };
@@ -138,5 +143,5 @@ export type MPIMMessageEvent = {
 };
 
 export const isMPIMMessageEvent = (
-  event: MessageEvent,
+  event: MessageEvent
 ): event is MPIMMessageEvent => event.event.channel_type === "mpim";
