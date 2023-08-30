@@ -57,3 +57,7 @@ export const getSlackEvent = async (
 
   return event;
 };
+
+export const deleteSlackEvent = async (id: string): Promise<void> => {
+  await firestore.doc(slackEventDocument(id)).delete();
+};

@@ -7,11 +7,11 @@ import {
 import { generateNegativeChatReply } from "../../../utils/openai/generate-negative-reply";
 import { generatePositiveChatReply } from "../../../utils/openai/generate-positive-reply";
 import { summarize } from "../../../utils/openai/summarize";
+import { addSlackReaction } from "../../../utils/slack/add-reaction";
 import { extractSlackMentions } from "../../../utils/slack/extract-mentions";
 import { fetchChannelName } from "../../../utils/slack/fetch-conversations-info";
 import { fetchTeamInfo } from "../../../utils/slack/fetch-team-info";
 import { fetchUserInfo } from "../../../utils/slack/fetch-users-info";
-import { replyToSlackThread } from "../../../utils/slack/reply-to-thread";
 import {
   ChannelsMessageEvent,
   GroupsMessageEvent
@@ -36,6 +36,13 @@ export const handleChannelMessage = async (
   if (verifiedUsers.length === 0) {
     return;
   }
+
+  await addSlackReaction({
+    accessToken,
+    channel: channel,
+    threadTimestamp: timestamp,
+    reactionName: "dog"
+  });
 
   const senderInfo = await fetchUserInfo(accessToken, slackUserId);
   if (!senderInfo.ok) {
@@ -99,13 +106,11 @@ export const handleChannelMessage = async (
     throw new Error("Failed to summarize");
   }
 
-  const botMessage = `あなたのメッセージを以下のタイトルで送信しました。\n\n ${summary} `;
-
-  await replyToSlackThread({
+  await addSlackReaction({
     accessToken,
     channel: channel,
     threadTimestamp: timestamp,
-    text: botMessage
+    reactionName: "dog"
   });
 
   await Promise.all(
@@ -129,7 +134,7 @@ export const handleChannelMessage = async (
         userId,
         message: text,
         summary,
-        botMessage,
+        botMessage: "",
         senderId: slackSender.sender_id,
         senderName: senderSlackName,
         senderIconUrl: senderSlackIconUrl,
