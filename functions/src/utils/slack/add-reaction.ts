@@ -22,7 +22,7 @@ export const addSlackReaction = async ({
 
     if (!response.ok) {
       console.log(
-        `Error sending message:, ${JSON.stringify(response.error).replace(
+        `Error adding reaction, ${JSON.stringify(response.error).replace(
           "\n",
           " "
         )}`
