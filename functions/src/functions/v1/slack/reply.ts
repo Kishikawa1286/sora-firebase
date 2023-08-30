@@ -25,7 +25,11 @@ export const slackReply = functions128MB.https.onCall(
       throw new Error("Message not found");
     }
 
-    const { slack_team_id: teamId } = message;
+    const { slack_team_id: teamId, slack_thread_ts: threadTimestamp } = message;
+    if (!threadTimestamp) {
+      throw new Error("message.threadTimestamp is not found");
+    }
+
     const accessToken = await getRefreshedAccessToken(teamId);
 
     await onReply({
@@ -37,7 +41,7 @@ export const slackReply = functions128MB.https.onCall(
     await replyToSlackThread({
       accessToken,
       channel: message.slack_channel_id,
-      threadTimestamp: message.slack_thread_ts,
+      threadTimestamp,
       text: reply
     });
   }

@@ -22,7 +22,13 @@ export const handleChannelMessage = async (
   event: ChannelsMessageEvent | GroupsMessageEvent
 ) => {
   const { team_id: teamId } = event;
-  const { text, user: slackUserId, channel, ts: timestamp } = event.event;
+  const {
+    text,
+    user: slackUserId,
+    channel,
+    ts: timestamp,
+    thread_ts: threadTimestamp
+  } = event.event;
 
   const mentionedUserIds = extractSlackMentions(text);
   const verifiedUsers = (
@@ -134,7 +140,7 @@ export const handleChannelMessage = async (
         userId,
         message: text,
         summary,
-        botMessage: "",
+        botMessage: "🐶",
         senderId: slackSender.sender_id,
         senderName: senderSlackName,
         senderIconUrl: senderSlackIconUrl,
@@ -146,7 +152,8 @@ export const handleChannelMessage = async (
         slackSenderUserId: senderSlackUserId,
         slackChannelId: channel,
         slackChannelName: channelName,
-        slackThreadTs: timestamp,
+        slackTs: timestamp,
+        slackThreadTs: threadTimestamp,
         positiveReply,
         negativeReply
       });

@@ -91,7 +91,8 @@ type SlackMessage = {
   slack_sender_user_id: string;
   slack_channel_id: string;
   slack_channel_name: string;
-  slack_thread_ts: string;
+  slack_ts: string;
+  slack_thread_ts?: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -124,7 +125,9 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
     typeof slackMessage.slack_sender_user_id === "string" &&
     typeof slackMessage.slack_channel_id === "string" &&
     typeof slackMessage.slack_channel_name === "string" &&
-    typeof slackMessage.slack_thread_ts === "string" &&
+    typeof slackMessage.slack_ts === "string" &&
+    (typeof slackMessage.slack_thread_ts === "string" ||
+      slackMessage.slack_thread_ts === undefined) &&
     slackMessage.created_at instanceof Timestamp &&
     slackMessage.last_updated_at instanceof Timestamp
   );
@@ -187,6 +190,7 @@ export const createSlackMessage = async ({
   slackChannelId,
   slackChannelName,
   slackThreadTs,
+  slackTs,
   positiveReply,
   negativeReply
 }: {
@@ -207,7 +211,8 @@ export const createSlackMessage = async ({
   slackSenderUserId: string;
   slackChannelId: string;
   slackChannelName: string;
-  slackThreadTs: string;
+  slackThreadTs?: string;
+  slackTs: string;
   positiveReply: string;
   negativeReply: string;
 }): Promise<SlackMessage> => {
@@ -256,6 +261,7 @@ export const createSlackMessage = async ({
     slack_sender_user_id: slackSenderUserId,
     slack_channel_id: slackChannelId,
     slack_channel_name: slackChannelName,
+    slack_ts: slackTs,
     slack_thread_ts: slackThreadTs,
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
