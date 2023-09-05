@@ -24,8 +24,8 @@ export const replyToSlackThread = async ({
       console.log(
         `Error sending message:, ${JSON.stringify(response.error).replace(
           "\n",
-          " ",
-        )}`,
+          " "
+        )}`
       );
       return;
     }

@@ -10,14 +10,19 @@ export const handleDirectMessage = async (
   event: IMMessageEvent
 ): Promise<void> => {
   const { team_id: teamId } = event;
-  const { user: slackUserId, channel, ts: timestamp } = event.event;
+  const {
+    user: slackUserId,
+    channel,
+    ts: timestamp,
+    thread_ts: threadTimestamp
+  } = event.event;
 
   const user = await getVerifiedSlackUser(teamId, slackUserId);
   if (user) {
     await replyToSlackThread({
       accessToken,
       channel: channel,
-      threadTimestamp: timestamp,
+      threadTimestamp: threadTimestamp ?? timestamp,
       text: "いつもご利用ありがとうございます！すでに認証されています。"
     });
     return;
@@ -34,7 +39,7 @@ export const handleDirectMessage = async (
   await replyToSlackThread({
     accessToken,
     channel: channel,
-    threadTimestamp: timestamp,
+    threadTimestamp: threadTimestamp ?? timestamp,
     text: `こちらの認証URLから認証を完了してください。\n\n${verificationUrl}`
   });
 };
