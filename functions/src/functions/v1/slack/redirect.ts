@@ -7,6 +7,8 @@ import { createSlackVerificationCode } from "../../../utils/firestore/slack-veri
 import { functions128MB } from "../../../utils/functions";
 import { generateUrlWithParams } from "../../../utils/generate-url-with-parans";
 import { fetchSlackAccessToken } from "../../../utils/slack/fetch-access-token";
+import { fetchConversationsList } from "../../../utils/slack/fetch-conversations-info";
+import { joinConversation } from "../../../utils/slack/join-conversatoin";
 
 export const slackRedirect = functions128MB.https.onRequest(
   async (req, res) => {
@@ -52,6 +54,22 @@ export const slackRedirect = functions128MB.https.onRequest(
         res.status(200).redirect(`https://app.slack.com/client/${teamId}`);
         return;
       }
+
+      const conversationsList = await fetchConversationsList(accessToken);
+      const { channels } = conversationsList;
+      if (!channels) {
+        res.status(500).send("Error: Missing channels from Slack API");
+        return;
+      }
+      await Promise.all(
+        channels.map(async (channel) => {
+          const { id: channelId } = channel;
+          if (!channelId) {
+            return;
+          }
+          await joinConversation(accessToken, channelId);
+        })
+      );
 
       const verificationCode = await createSlackVerificationCode({
         slackUserId,
