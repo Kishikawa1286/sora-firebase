@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
 import { randomString } from "../random-string";
+import { MessageEvent } from "../slack/types/message-events";
 import { userDocument } from "./user";
 
 export type MessageType = "slack";
