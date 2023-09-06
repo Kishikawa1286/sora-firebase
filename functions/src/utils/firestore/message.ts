@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
 import { randomString } from "../random-string";
+import { generateSlackRedirectUrl } from "../slack/generate-redirect-url";
 import { MessageEvent } from "../slack/types/message-events";
 import { userDocument } from "./user";
 
@@ -37,6 +38,7 @@ type Message = {
   is_schedule_adjustment: boolean;
   positive_reply: string;
   negative_reply: string;
+  redirect_url?: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -67,6 +69,8 @@ const isMessage = (data: unknown): data is Message => {
     typeof message.is_schedule_adjustment === "boolean" &&
     typeof message.positive_reply === "string" &&
     typeof message.negative_reply === "string" &&
+    (typeof message.redirect_url === "string" ||
+      message.redirect_url === undefined) &&
     message.created_at instanceof Timestamp &&
     message.last_updated_at instanceof Timestamp
   );
@@ -95,6 +99,7 @@ type SlackMessage = {
   slack_ts: string;
   slack_thread_ts?: string;
   event: string;
+  redirect_url?: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
 };
@@ -131,6 +136,8 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
     (typeof slackMessage.slack_thread_ts === "string" ||
       slackMessage.slack_thread_ts === undefined) &&
     typeof slackMessage.event === "string" &&
+    (typeof slackMessage.redirect_url === "string" ||
+      slackMessage.redirect_url === undefined) &&
     slackMessage.created_at instanceof Timestamp &&
     slackMessage.last_updated_at instanceof Timestamp
   );
@@ -243,6 +250,12 @@ export const createSlackMessage = async ({
     is_schedule_adjustment: false,
     positive_reply: positiveReply,
     negative_reply: negativeReply,
+    redirect_url: generateSlackRedirectUrl({
+      slack_team_domain: slackTeamDomain,
+      slack_channel_id: slackChannelId,
+      slack_ts: slackTs,
+      slack_thread_ts: slackThreadTs
+    }),
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
@@ -269,6 +282,12 @@ export const createSlackMessage = async ({
     slack_ts: slackTs,
     slack_thread_ts: slackThreadTs,
     event: JSON.stringify(event),
+    redirect_url: generateSlackRedirectUrl({
+      slack_team_domain: slackTeamDomain,
+      slack_channel_id: slackChannelId,
+      slack_ts: slackTs,
+      slack_thread_ts: slackThreadTs
+    }),
     created_at: Timestamp.now(),
     last_updated_at: Timestamp.now()
   };
