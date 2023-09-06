@@ -7,12 +7,10 @@ import { getSlackToken } from "../../../utils/firestore/slack-token";
 import { functions512MB } from "../../../utils/functions";
 import {
   isChannelsMessageEvent,
-  isGroupsMessageEvent,
-  isIMMessageEvent
+  isGroupsMessageEvent
 } from "../../../utils/slack/types/message-events";
 import { getRefreshedAccessToken } from "./get-refreshed-access-token";
 import { handleChannelMessage } from "./handle-channel-message";
-import { handleDirectMessage } from "./handle-direct-message";
 
 export const onSaveSlackEvent = functions512MB.firestore
   .document(`${slackEventCollection}/{eventId}`)
@@ -35,9 +33,7 @@ export const onSaveSlackEvent = functions512MB.firestore
 
       const accessToken = await getRefreshedAccessToken(teamId);
 
-      if (isIMMessageEvent(messageEvent)) {
-        await handleDirectMessage(accessToken, messageEvent);
-      } else if (isChannelsMessageEvent(messageEvent)) {
+      if (isChannelsMessageEvent(messageEvent)) {
         await handleChannelMessage(accessToken, messageEvent);
       } else if (isGroupsMessageEvent(messageEvent)) {
         await handleChannelMessage(accessToken, messageEvent);

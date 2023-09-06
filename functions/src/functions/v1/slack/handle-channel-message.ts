@@ -155,7 +155,8 @@ export const handleChannelMessage = async (
         slackTs: timestamp,
         slackThreadTs: threadTimestamp,
         positiveReply,
-        negativeReply
+        negativeReply,
+        event: event
       });
     })
   );
