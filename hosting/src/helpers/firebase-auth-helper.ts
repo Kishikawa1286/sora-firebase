@@ -4,6 +4,7 @@ import {
   User,
   onAuthStateChanged as _onAuthStateChanged,
   getAuth,
+  getRedirectResult,
   signInWithEmailAndPassword,
   signInWithRedirect
 } from "firebase/auth";
@@ -20,6 +21,14 @@ export const onAuthStateChanged = (nextOrObserver: NextOrObserver<User>) => {
 export const signInWithApple = async () => {
   const provider = new OAuthProvider("apple.com");
   await signInWithRedirect(auth, provider);
+};
+
+export const handleRedirect = async () => {
+  const result = await getRedirectResult(auth);
+  if (!result) {
+    return;
+  }
+  await auth.updateCurrentUser(result.user);
 };
 
 export const signInWithEmail = async (email: string, password: string) => {

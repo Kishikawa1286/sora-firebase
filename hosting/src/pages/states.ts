@@ -1,32 +1,21 @@
 import { useEffect } from "react";
 import { atom, selector, useRecoilState } from "recoil";
 import {
-  signInWithEmail as _signInWithEmail,
+  signInWithApple as _signInWithApple,
   authenticateWithCode,
+  handleRedirect,
   onAuthStateChanged
 } from "../repositories/auth-repository/auth-repository";
 import { ViewModel } from "../utils/view-model";
 
 type AuthenticationPageViewModel = {
   authenticated: boolean;
-  email: string;
-  password: string;
   errorMessage: string | null;
 };
 
 const authenticatedAtom = atom<boolean>({
   key: "authenticationPageModel-authenticated",
   default: false
-});
-
-const emailAtom = atom<string>({
-  key: "authenticationPageModel-email",
-  default: ""
-});
-
-const passwordAtom = atom<string>({
-  key: "authenticationPageModel-password",
-  default: ""
 });
 
 const errorMessageAtom = atom<string | null>({
@@ -40,18 +29,6 @@ const authenticatedSelector = selector<boolean>({
   set: ({ set }, authenticated) => set(authenticatedAtom, authenticated)
 });
 
-const emailSelector = selector<string>({
-  key: "authenticationPageViewModel-email",
-  get: ({ get }) => get(emailAtom),
-  set: ({ set }, email) => set(emailAtom, email)
-});
-
-const passwordSelector = selector<string>({
-  key: "authenticationPageViewModel-password",
-  get: ({ get }) => get(passwordAtom),
-  set: ({ set }, password) => set(passwordAtom, password)
-});
-
 const errorMessageSelector = selector<string | null>({
   key: "authenticationPageViewModel-errorMessage",
   get: ({ get }) => get(errorMessageAtom),
@@ -63,8 +40,6 @@ export const useAuthenticationPageViewModel =
     const [authenticated, setAuthenticated] = useRecoilState(
       authenticatedSelector
     );
-    const [email, setEmail] = useRecoilState(emailSelector);
-    const [password, setPassword] = useRecoilState(passwordSelector);
     const [errorMessage, setErrorMessage] =
       useRecoilState(errorMessageSelector);
 
@@ -75,10 +50,11 @@ export const useAuthenticationPageViewModel =
           setAuthenticated(true);
         }
       });
+      handleRedirect();
     });
 
-    const signInWithEmail = async () => {
-      const result = await _signInWithEmail(email, password);
+    const signInWithApple = async () => {
+      const result = await _signInWithApple();
       if (!result.success) {
         setErrorMessage(result.errorMessage);
         return;
@@ -89,14 +65,10 @@ export const useAuthenticationPageViewModel =
     return {
       state: {
         authenticated,
-        email,
-        password,
         errorMessage
       },
       actions: {
-        signInWithEmail,
-        setEmail,
-        setPassword
+        signInWithApple
       }
     };
   };
