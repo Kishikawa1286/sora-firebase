@@ -8,6 +8,7 @@ import {
   Typography
 } from "@mui/material";
 import React from "react";
+import { APP_DYNAMIC_LINK } from "../utils/env";
 import { useAuthenticationPageViewModel } from "./states";
 
 const AuthenticationPage: React.FC<object> = () => {
@@ -39,6 +40,13 @@ const AuthenticationPage: React.FC<object> = () => {
               <Typography variant="body1" gutterBottom>
                 認証が完了しました！
               </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ marginTop: 20 }}
+              >
+                <a href={APP_DYNAMIC_LINK}>アプリを開く</a>
+              </Button>
             </div>
           ) : (
             <div>
