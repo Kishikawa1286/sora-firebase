@@ -3,7 +3,6 @@ import { atom, selector, useRecoilState } from "recoil";
 import {
   signInWithApple as _signInWithApple,
   authenticateWithCode,
-  handleRedirect,
   onAuthStateChanged
 } from "../repositories/auth-repository/auth-repository";
 import { ViewModel } from "../utils/view-model";
@@ -50,7 +49,6 @@ export const useAuthenticationPageViewModel =
           setAuthenticated(true);
         }
       });
-      handleRedirect();
     });
 
     const signInWithApple = async () => {

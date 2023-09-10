@@ -1,6 +1,5 @@
 import { FirebaseError } from "@firebase/util";
 import {
-  handleRedirect as _handleRedirect,
   onAuthStateChanged as _onAuthStateChanged,
   signInWithApple as _signInWithApple
 } from "../../helpers/firebase-auth-helper";
@@ -34,14 +33,6 @@ export const signInWithApple = async (): Promise<SignInResult> => {
       success: false,
       errorMessage: "認証に失敗しました。しばらく時間をおいて再度お試しください"
     };
-  }
-};
-
-export const handleRedirect = async () => {
-  try {
-    await _handleRedirect();
-  } catch (error) {
-    console.error(error);
   }
 };
 
