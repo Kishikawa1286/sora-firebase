@@ -1,7 +1,7 @@
 import { FirebaseError } from "@firebase/util";
 import {
   onAuthStateChanged as _onAuthStateChanged,
-  signInWithEmail as _signInWithEmail
+  signInWithApple as _signInWithApple
 } from "../../helpers/firebase-auth-helper";
 import { callFirebaseFunction } from "../../helpers/firebase-functions-helper";
 import { getQueryParam } from "../../helpers/query-param-helper";
@@ -14,12 +14,9 @@ type SignInResult = {
   errorMessage: string | null; // null if success is true
 };
 
-export const signInWithEmail = async (
-  email: string,
-  password: string
-): Promise<SignInResult> => {
+export const signInWithApple = async (): Promise<SignInResult> => {
   try {
-    await _signInWithEmail(email, password);
+    await _signInWithApple();
     return {
       success: true,
       errorMessage: null

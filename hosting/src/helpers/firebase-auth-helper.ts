@@ -5,7 +5,7 @@ import {
   onAuthStateChanged as _onAuthStateChanged,
   getAuth,
   signInWithEmailAndPassword,
-  signInWithRedirect
+  signInWithPopup
 } from "firebase/auth";
 import { firebaseApp } from "../utils/firebase-app";
 
@@ -19,7 +19,7 @@ export const onAuthStateChanged = (nextOrObserver: NextOrObserver<User>) => {
 
 export const signInWithApple = async () => {
   const provider = new OAuthProvider("apple.com");
-  await signInWithRedirect(auth, provider);
+  await signInWithPopup(auth, provider);
 };
 
 export const signInWithEmail = async (email: string, password: string) => {
