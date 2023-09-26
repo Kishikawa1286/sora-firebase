@@ -1,6 +1,7 @@
 {
   "projects": {
     "dev": "sora-dev-kam",
+    "prod": "sora-prod-kam",
     "default": "sora-dev-kam"
   }
 }
