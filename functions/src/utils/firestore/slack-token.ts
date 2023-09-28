@@ -80,6 +80,40 @@ export const setSlackToken = async ({
   botUserId: string;
 }): Promise<void> => {
   const expiresAt = expirationDate(expiresInSeconds);
+
+  const snapshot = await firestore.doc(slackTokenDocument(teamId)).get();
+
+  if (!snapshot.exists) {
+    const slackToken: SlackToken = {
+      id: teamId,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: Timestamp.fromDate(expiresAt),
+      bot_user_id: botUserId,
+      subscribing_user_ids: [],
+      created_at: Timestamp.now(),
+      last_updated_at: Timestamp.now()
+    };
+    await firestore.doc(slackTokenDocument(teamId)).set(slackToken);
+    return;
+  }
+
+  const data = snapshot.data();
+  if (!isSlackToken(data)) {
+    const slackToken: SlackToken = {
+      id: teamId,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: Timestamp.fromDate(expiresAt),
+      bot_user_id: botUserId,
+      subscribing_user_ids: [],
+      created_at: Timestamp.now(),
+      last_updated_at: Timestamp.now()
+    };
+    await firestore.doc(slackTokenDocument(teamId)).set(slackToken);
+    return;
+  }
+
   const slackToken: SlackToken = {
     id: teamId,
     access_token: accessToken,
@@ -87,7 +121,7 @@ export const setSlackToken = async ({
     expires_at: Timestamp.fromDate(expiresAt),
     bot_user_id: botUserId,
     subscribing_user_ids: [],
-    created_at: Timestamp.now(),
+    created_at: data.created_at,
     last_updated_at: Timestamp.now()
   };
   await firestore.doc(slackTokenDocument(teamId)).set(slackToken);
@@ -125,7 +159,7 @@ export const getSlackToken = async (teamId: string): Promise<SlackToken> => {
 export const setVerifiedSlackUser = async (
   teamId: string,
   userId: string, // App user ID
-  slackUserId: string,
+  slackUserId: string
 ): Promise<void> => {
   const verifiedSlackUser: VerifiedSlackUser = {
     id: userId,
@@ -141,7 +175,7 @@ export const setVerifiedSlackUser = async (
 
 export const getVerifiedSlackUser = async (
   teamId: string,
-  slackUserId: string,
+  slackUserId: string
 ): Promise<VerifiedSlackUser | null> => {
   const document = await firestore
     .collection(verifiedSlackUsersCollection(teamId))
@@ -159,7 +193,7 @@ export const getVerifiedSlackUser = async (
 
 export const deleteVerifiedSlackUser = async (
   teamId: string,
-  userId: string, // App user ID
+  userId: string // App user ID
 ): Promise<void> => {
   await firestore.doc(verifiedSlackUserDocument(teamId, userId)).delete();
 };
