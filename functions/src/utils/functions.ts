@@ -3,13 +3,7 @@ import * as f from "firebase-functions";
 process.env.TZ = "Asia/Tokyo";
 
 // TODO: Use different secrets depending on the function
-const secrets = [
-  "SLACK_CLIENT_ID",
-  "SLACK_CLIENT_SECRET",
-  "OPENAI_API_KEY",
-  "LINE_CHANNEL_ACCESS_TOKEN",
-  "LINE_CHANNEL_SECRET"
-];
+const secrets = ["SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET", "OPENAI_API_KEY"];
 
 export const functions8GB = f
   .runWith({ secrets, memory: "8GB" })

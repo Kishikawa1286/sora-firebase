@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": false,
   "scripts": {
-    "build": "tsc && vite build",
+    "build:dev": "tsc && vite build --mode dev",
+    "build:prod": "tsc && vite build --mode prod",
     "check-updates": "npm-check-updates",
     "dev": "vite --host 0.0.0.0",
     "lint": "eslint src --ext ts,tsx",
