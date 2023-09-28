@@ -2,7 +2,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
 import { randomString } from "../random-string";
 import { generateSlackRedirectUrl } from "../slack/generate-redirect-url";
-import { MessageEvent } from "../slack/types/message-events";
+import { SlackMessageEvent } from "../slack/types/message-events";
 import { userDocument } from "./user";
 
 export type MessageType = "slack";
@@ -224,7 +224,7 @@ export const createSlackMessage = async ({
   slackChannelName: string;
   slackThreadTs?: string;
   slackTs: string;
-  event: MessageEvent;
+  event: SlackMessageEvent;
   positiveReply: string;
   negativeReply: string;
 }): Promise<SlackMessage> => {
@@ -326,4 +326,28 @@ export const getSlackMessage = async (
     return null;
   }
   return data;
+};
+
+export const getSlackMessagesByThreadTimestamp = async (
+  teamId: string,
+  channelId: string,
+  threadTimestamp: string
+): Promise<Message[]> => {
+  const snapshot = await firestore
+    .collectionGroup("slack_message_v1")
+    .where("slack_team_id", "==", teamId)
+    .where("slack_channel_id", "==", channelId)
+    .where("slack_thread_ts", "==", threadTimestamp)
+    .get();
+  const slackMessages = snapshot.docs
+    .map((doc) => doc.data())
+    .filter(isSlackMessage);
+  const messages = (
+    await Promise.all(
+      slackMessages.map((slackMessage) =>
+        getMessage(slackMessage.user_id, slackMessage.message_id)
+      )
+    )
+  ).filter(isMessage);
+  return messages;
 };

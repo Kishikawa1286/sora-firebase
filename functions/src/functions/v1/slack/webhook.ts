@@ -1,7 +1,7 @@
 import { saveSlackEvent } from "../../../utils/firestore/slack-event";
 import { getSlackToken } from "../../../utils/firestore/slack-token";
 import { functions256MB } from "../../../utils/functions";
-import { isMessageEvent } from "../../../utils/slack/types/message-events";
+import { isSlackMessageEvent } from "../../../utils/slack/types/message-events";
 
 export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
   try {
@@ -12,7 +12,7 @@ export const slackWebhook = functions256MB.https.onRequest(async (req, res) => {
     }
 
     const { body } = req;
-    if (!isMessageEvent(body)) {
+    if (!isSlackMessageEvent(body)) {
       res.status(200).send("Success");
       return;
     }

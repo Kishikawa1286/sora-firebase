@@ -1,4 +1,8 @@
-import { createSlackMessage } from "../../../utils/firestore/message";
+import {
+  createSlackMessage,
+  getSlackMessagesByThreadTimestamp,
+  onReply
+} from "../../../utils/firestore/message";
 import { setSlackSender } from "../../../utils/firestore/sender";
 import {
   VerifiedSlackUser,
@@ -29,6 +33,23 @@ export const handleChannelMessage = async (
     ts: timestamp,
     thread_ts: threadTimestamp
   } = event.event;
+
+  if (threadTimestamp !== undefined) {
+    const threadMessages = await getSlackMessagesByThreadTimestamp(
+      teamId,
+      channel,
+      threadTimestamp
+    );
+    await Promise.all(
+      threadMessages.map(async (message) => {
+        await onReply({
+          userId: message.user_id,
+          messageId: message.id,
+          reply: message.reply === "" ? text : message.reply
+        });
+      })
+    );
+  }
 
   const mentionedUserIds = extractSlackMentions(text);
   const verifiedUsers = (
@@ -140,7 +161,7 @@ export const handleChannelMessage = async (
         userId,
         message: text,
         summary,
-        botMessage: "🐶",
+        botMessage: "",
         senderId: slackSender.sender_id,
         senderName: senderSlackName,
         senderIconUrl: senderSlackIconUrl,
