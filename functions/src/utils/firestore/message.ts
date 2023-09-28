@@ -327,3 +327,27 @@ export const getSlackMessage = async (
   }
   return data;
 };
+
+export const getSlackMessagesByThreadTimestamp = async (
+  teamId: string,
+  channelId: string,
+  threadTimestamp: string
+): Promise<Message[]> => {
+  const snapshot = await firestore
+    .collectionGroup("slack_message_v1")
+    .where("slack_team_id", "==", teamId)
+    .where("slack_channel_id", "==", channelId)
+    .where("slack_thread_ts", "==", threadTimestamp)
+    .get();
+  const slackMessages = snapshot.docs
+    .map((doc) => doc.data())
+    .filter(isSlackMessage);
+  const messages = (
+    await Promise.all(
+      slackMessages.map((slackMessage) =>
+        getMessage(slackMessage.user_id, slackMessage.message_id)
+      )
+    )
+  ).filter(isMessage);
+  return messages;
+};
