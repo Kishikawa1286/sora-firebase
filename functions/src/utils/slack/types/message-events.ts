@@ -1,15 +1,17 @@
-export type MessageEvent =
+export type SlackMessageEvent =
   | AppHomeMessageEvent
   | ChannelsMessageEvent
   | GroupsMessageEvent
   | IMMessageEvent
   | MPIMMessageEvent;
 
-export const isMessageEvent = (event: unknown): event is MessageEvent => {
+export const isSlackMessageEvent = (
+  event: unknown
+): event is SlackMessageEvent => {
   if (typeof event !== "object" || event === null) {
     return false;
   }
-  const e = event as MessageEvent;
+  const e = event as SlackMessageEvent;
   return (
     e.type === "event_callback" &&
     e.event.type === "message" &&
@@ -43,7 +45,7 @@ export type AppHomeMessageEvent = {
 };
 
 export const isAppHomeMessageEvent = (
-  event: MessageEvent
+  event: SlackMessageEvent
 ): event is AppHomeMessageEvent => event.event.channel_type === "app_home";
 
 // See: https://api.slack.com/events/message.channels
@@ -68,7 +70,7 @@ export type ChannelsMessageEvent = {
 };
 
 export const isChannelsMessageEvent = (
-  event: MessageEvent
+  event: SlackMessageEvent
 ): event is ChannelsMessageEvent => event.event.channel_type === "channel";
 
 // See: https://api.slack.com/events/message.groups
@@ -93,7 +95,7 @@ export type GroupsMessageEvent = {
 };
 
 export const isGroupsMessageEvent = (
-  event: MessageEvent
+  event: SlackMessageEvent
 ): event is GroupsMessageEvent => event.event.channel_type === "group";
 
 // See: https://api.slack.com/events/message.im
@@ -118,7 +120,7 @@ export type IMMessageEvent = {
 };
 
 export const isIMMessageEvent = (
-  event: MessageEvent
+  event: SlackMessageEvent
 ): event is IMMessageEvent => event.event.channel_type === "im";
 
 // See: https://api.slack.com/events/message.mpim
@@ -143,5 +145,5 @@ export type MPIMMessageEvent = {
 };
 
 export const isMPIMMessageEvent = (
-  event: MessageEvent
+  event: SlackMessageEvent
 ): event is MPIMMessageEvent => event.event.channel_type === "mpim";

@@ -2,7 +2,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
 import { randomString } from "../random-string";
 import { generateSlackRedirectUrl } from "../slack/generate-redirect-url";
-import { MessageEvent } from "../slack/types/message-events";
+import { SlackMessageEvent } from "../slack/types/message-events";
 import { userDocument } from "./user";
 
 export type MessageType = "slack";
@@ -224,7 +224,7 @@ export const createSlackMessage = async ({
   slackChannelName: string;
   slackThreadTs?: string;
   slackTs: string;
-  event: MessageEvent;
+  event: SlackMessageEvent;
   positiveReply: string;
   negativeReply: string;
 }): Promise<SlackMessage> => {
