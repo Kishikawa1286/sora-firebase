@@ -20,7 +20,8 @@
     "axios": "1.4.0",
     "firebase-admin": "11.10.1",
     "firebase-functions": "4.4.1",
-    "openai": "4.0.1"
+    "openai": "4.0.1",
+    "sharp": "0.32.5"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",

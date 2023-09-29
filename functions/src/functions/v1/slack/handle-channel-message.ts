@@ -20,6 +20,7 @@ import {
   ChannelsMessageEvent,
   GroupsMessageEvent
 } from "../../../utils/slack/types/message-events";
+import { handleSlackFiles } from "./handle-files";
 
 export const handleChannelMessage = async (
   accessToken: string,
@@ -31,7 +32,8 @@ export const handleChannelMessage = async (
     user: slackUserId,
     channel,
     ts: timestamp,
-    thread_ts: threadTimestamp
+    thread_ts: threadTimestamp,
+    files
   } = event.event;
 
   if (threadTimestamp !== undefined) {
@@ -54,9 +56,7 @@ export const handleChannelMessage = async (
   const mentionedUserIds = extractSlackMentions(text);
   const verifiedUsers = (
     await Promise.all(
-      mentionedUserIds.map((slackUserId) =>
-        getVerifiedSlackUser(teamId, slackUserId)
-      )
+      mentionedUserIds.map((userId) => getVerifiedSlackUser(teamId, userId))
     )
   ).filter((user) => user !== null) as VerifiedSlackUser[];
 
@@ -69,6 +69,11 @@ export const handleChannelMessage = async (
     channel: channel,
     threadTimestamp: timestamp,
     reactionName: "dog"
+  });
+
+  const { imageUrls, nonImageFiles } = await handleSlackFiles({
+    files,
+    accessToken
   });
 
   const senderInfo = await fetchUserInfo(accessToken, slackUserId);
@@ -166,6 +171,8 @@ export const handleChannelMessage = async (
         senderName: senderSlackName,
         senderIconUrl: senderSlackIconUrl,
         slackTeamId: teamId,
+        imageUrls,
+        nonImageFileNames: nonImageFiles.map((file) => file.name),
         slackTeamDomain,
         slackTeamIconUrl,
         slackTeamName,

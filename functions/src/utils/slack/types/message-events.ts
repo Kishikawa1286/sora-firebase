@@ -23,6 +23,13 @@ export const isSlackMessageEvent = (
   );
 };
 
+// See: https://api.slack.com/types/file
+export type SlackFile = {
+  name: string;
+  mimetype: string;
+  url_private_download: string;
+};
+
 // See: https://api.slack.com/events/message.app_home
 export type AppHomeMessageEvent = {
   token: string;
@@ -37,6 +44,7 @@ export type AppHomeMessageEvent = {
     channel: string;
     event_ts: string;
     channel_type: "app_home";
+    files?: SlackFile[];
   };
   type: "event_callback";
   authed_teams: string[];
@@ -62,6 +70,7 @@ export type ChannelsMessageEvent = {
     thread_ts?: string;
     event_ts: string;
     channel_type: "channel";
+    files?: SlackFile[];
   };
   type: "event_callback";
   authed_teams: string[];
@@ -87,6 +96,7 @@ export type GroupsMessageEvent = {
     thread_ts?: string;
     event_ts: string;
     channel_type: "group";
+    files?: SlackFile[];
   };
   type: "event_callback";
   authed_teams: string[];
@@ -112,6 +122,7 @@ export type IMMessageEvent = {
     thread_ts?: string;
     event_ts: string;
     channel_type: "im";
+    files?: SlackFile[];
   };
   type: "event_callback";
   authed_teams: string[];
@@ -137,6 +148,7 @@ export type MPIMMessageEvent = {
     thread_ts?: string;
     event_ts: string;
     channel_type: "mpim";
+    files?: SlackFile[];
   };
   type: "event_callback";
   authed_teams: string[];

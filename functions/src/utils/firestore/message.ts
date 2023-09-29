@@ -31,6 +31,7 @@ type Message = {
   sender_name: string;
   sender_icon_url?: string;
   image_urls: string[];
+  nonimage_file_names?: string[];
   file_attached: boolean;
   replied: boolean;
   archived: boolean;
@@ -62,6 +63,11 @@ const isMessage = (data: unknown): data is Message => {
       message.sender_icon_url === undefined) &&
     message.image_urls instanceof Array &&
     message.image_urls.every((url) => typeof url === "string") &&
+    (message.nonimage_file_names === undefined ||
+      (message.nonimage_file_names instanceof Array &&
+        message.nonimage_file_names.every(
+          (name) => typeof name === "string"
+        ))) &&
     typeof message.file_attached === "boolean" &&
     typeof message.replied === "boolean" &&
     typeof message.archived === "boolean" &&
@@ -87,6 +93,7 @@ type SlackMessage = {
   sender_name: string;
   sender_icon_url?: string;
   image_urls: string[];
+  nonimage_file_names?: string[];
   file_attached: boolean;
   slack_team_id: string;
   slack_team_domain: string;
@@ -122,6 +129,11 @@ const isSlackMessage = (data: unknown): data is SlackMessage => {
       slackMessage.sender_icon_url === undefined) &&
     slackMessage.image_urls instanceof Array &&
     slackMessage.image_urls.every((url) => typeof url === "string") &&
+    (slackMessage.nonimage_file_names === undefined ||
+      (slackMessage.nonimage_file_names instanceof Array &&
+        slackMessage.nonimage_file_names.every(
+          (name) => typeof name === "string"
+        ))) &&
     typeof slackMessage.file_attached === "boolean" &&
     typeof slackMessage.slack_team_id === "string" &&
     typeof slackMessage.slack_team_domain === "string" &&
@@ -190,7 +202,7 @@ export const createSlackMessage = async ({
   senderName,
   senderIconUrl,
   imageUrls,
-  fileAttached,
+  nonImageFileNames,
   slackTeamId,
   slackTeamDomain,
   slackTeamIconUrl,
@@ -213,7 +225,7 @@ export const createSlackMessage = async ({
   senderName: string;
   senderIconUrl?: string;
   imageUrls?: string[];
-  fileAttached?: boolean;
+  nonImageFileNames: string[];
   slackTeamId: string;
   slackTeamDomain: string;
   slackTeamIconUrl?: string;
@@ -242,7 +254,8 @@ export const createSlackMessage = async ({
     sender_name: senderName,
     sender_icon_url: senderIconUrl,
     image_urls: imageUrls ?? [],
-    file_attached: fileAttached ?? false,
+    nonimage_file_names: nonImageFileNames,
+    file_attached: nonImageFileNames.length > 0 && (imageUrls?.length ?? 0) > 0,
     replied: false,
     archived: false,
     read: false,
@@ -270,7 +283,8 @@ export const createSlackMessage = async ({
     sender_name: senderName,
     sender_icon_url: senderIconUrl,
     image_urls: imageUrls ?? [],
-    file_attached: fileAttached ?? false,
+    nonimage_file_names: nonImageFileNames,
+    file_attached: nonImageFileNames.length > 0 && (imageUrls?.length ?? 0) > 0,
     slack_team_id: slackTeamId,
     slack_team_domain: slackTeamDomain,
     slack_team_icon_url: slackTeamIconUrl,
