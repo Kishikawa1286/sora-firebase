@@ -147,13 +147,6 @@ export const handleChannelMessage = async (
     throw new Error("Failed to summarize");
   }
 
-  await addSlackReaction({
-    accessToken,
-    channel: channel,
-    threadTimestamp: timestamp,
-    reactionName: "dog"
-  });
-
   await Promise.all(
     // For all mentioned verified users
     verifiedUsers.map(async (user) => {

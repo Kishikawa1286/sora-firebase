@@ -27,27 +27,25 @@ export const handleScheduleAdjustment = async ({
 
   const verifiedUser = verifiedUsers[0];
 
-  const isScheduleAdjestment = await determineWhetherScheduleAdjustment(text);
+  const isScheduleAdjustment = await determineWhetherScheduleAdjustment(text);
 
-  if (!isScheduleAdjestment) {
+  if (!isScheduleAdjustment) {
     return {
       isScheduleAdjustment: false,
       botMessage: ""
     };
   }
 
-  const scheduleAdjustmentUrl = await getUserScheduleAdjustmentUrl(
-    verifiedUser.id
-  );
+  const url = await getUserScheduleAdjustmentUrl(verifiedUser.id);
 
-  if (!scheduleAdjustmentUrl) {
+  if (!url) {
     return {
-      isScheduleAdjustment: false,
+      isScheduleAdjustment: isScheduleAdjustment,
       botMessage: ""
     };
   }
 
-  const botMessage = `こちらの日程調整リンクから日程調整できます\n${scheduleAdjustmentUrl}`;
+  const botMessage = `こちらの日程調整リンクから日程調整できます\n${url}`;
 
   await replyToSlackThread({
     accessToken,
