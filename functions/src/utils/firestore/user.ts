@@ -11,8 +11,24 @@ const slackUserDocument = (userId: string, slackUserId: string) =>
 type User = {
   id: string; // firebase user id
   email?: string;
+  schedule_adjustment_url?: string;
   created_at: Timestamp;
   last_updated_at: Timestamp;
+};
+
+export const isUser = (data: unknown): data is User => {
+  if (typeof data !== "object" || data === null) {
+    return false;
+  }
+  const user = data as User;
+  return (
+    typeof user.id === "string" &&
+    (typeof user.email === "string" || user.email === undefined) &&
+    (typeof user.schedule_adjustment_url === "string" ||
+      user.schedule_adjustment_url === undefined) &&
+    user.created_at instanceof Timestamp &&
+    user.last_updated_at instanceof Timestamp
+  );
 };
 
 type SlackUser = {
@@ -70,6 +86,33 @@ export const createUser = async ({
     .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
 
   await firestore.doc(userDocument(id)).create(filteredUser);
+};
+
+export const getUserScheduleAdjustmentUrl = async (
+  userId: string
+): Promise<string | null> => {
+  const doc = await firestore.doc(userDocument(userId)).get();
+  if (!doc.exists) {
+    return null;
+  }
+  const data = doc.data();
+  if (!isUser(data)) {
+    return null;
+  }
+  return data.schedule_adjustment_url ?? null;
+};
+
+export const setUserScheduleAdjustmentUrl = async ({
+  userId,
+  scheduleAdjustmentUrl
+}: {
+  userId: string;
+  scheduleAdjustmentUrl: string;
+}): Promise<void> => {
+  await firestore.doc(userDocument(userId)).update({
+    schedule_adjustment_url: scheduleAdjustmentUrl,
+    last_updated_at: Timestamp.now()
+  });
 };
 
 export const deleteUser = async (id: string) => {

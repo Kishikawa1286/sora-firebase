@@ -203,6 +203,7 @@ export const createSlackMessage = async ({
   senderIconUrl,
   imageUrls,
   nonImageFileNames,
+  isScheduleAdjustment,
   slackTeamId,
   slackTeamDomain,
   slackTeamIconUrl,
@@ -226,6 +227,7 @@ export const createSlackMessage = async ({
   senderIconUrl?: string;
   imageUrls?: string[];
   nonImageFileNames: string[];
+  isScheduleAdjustment: boolean;
   slackTeamId: string;
   slackTeamDomain: string;
   slackTeamIconUrl?: string;
@@ -259,8 +261,7 @@ export const createSlackMessage = async ({
     replied: false,
     archived: false,
     read: false,
-    // TODO: is_schedule_adjustment
-    is_schedule_adjustment: false,
+    is_schedule_adjustment: isScheduleAdjustment,
     positive_reply: positiveReply,
     negative_reply: negativeReply,
     redirect_url: generateSlackRedirectUrl({
