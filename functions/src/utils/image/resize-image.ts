@@ -4,12 +4,10 @@ export const resizeImage = async (
   buffer: Buffer,
   {
     width,
-    height,
-    format
+    height
   }: {
     width: number;
     height: number;
-    format: "webp" | "jpeg" | "png";
   }
 ): Promise<Buffer> => {
   try {
@@ -20,7 +18,7 @@ export const resizeImage = async (
         fit: sharp.fit.inside,
         withoutEnlargement: true
       })
-      .toFormat(format, { quality: 70 })
+      .jpeg({ quality: 70 })
       .toBuffer();
 
     return resizedBuffer;

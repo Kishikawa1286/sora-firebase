@@ -13,6 +13,24 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "slack_message_v1",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "slack_channel_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "slack_team_id",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "slack_thread_ts",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

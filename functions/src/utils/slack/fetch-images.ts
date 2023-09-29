@@ -15,17 +15,16 @@ export const fetchImages = async ({
         return null;
       }
 
-      const response = await axios.get(slackFile.url_private_download, {
+      const response = await axios.get<Buffer>(slackFile.url_private_download, {
         responseType: "arraybuffer",
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
 
-      return resizeImage(Buffer.from(response.data), {
+      return resizeImage(response.data, {
         width: 400,
-        height: 400,
-        format: "jpeg"
+        height: 400
       });
     })
   );
