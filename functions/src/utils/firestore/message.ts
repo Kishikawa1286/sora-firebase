@@ -12,7 +12,7 @@ const messagesCollection = (userId: string) =>
 const messageDocument = (userId: string, messageId: string) =>
   `${messagesCollection(userId)}/${messageId}`;
 const slackMessageCollection = (userId: string, messageId: string) =>
-  `${messageDocument(userId, messageId)}/slack_message_v1`;
+  `${messageDocument(userId, messageId)}/slack_messages_v1`;
 const slackMessageDocument = (
   userId: string,
   messageId: string,
