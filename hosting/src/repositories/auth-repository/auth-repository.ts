@@ -1,20 +1,25 @@
 import { FirebaseError } from "@firebase/util";
 import {
-  onAuthStateChanged as _onAuthStateChanged,
-  signInWithApple as _signInWithApple
+  signInWithApple as _signInWithApple,
+  onAuthStateChanged
 } from "../../helpers/firebase-auth-helper";
 import { callFirebaseFunction } from "../../helpers/firebase-functions-helper";
 import { getQueryParam } from "../../helpers/query-param-helper";
+import { cachedAtom } from "../../utils/templates/cached-recoil";
 import { handleSigninError } from "./error-message";
 
-export const onAuthStateChanged = _onAuthStateChanged;
+export type AuthRepository = {
+  onAuthStateChanged: typeof onAuthStateChanged;
+  signInWithApple: typeof signInWithApple;
+  authenticateWithCode: typeof authenticateWithCode;
+};
 
 type SignInResult = {
   success: boolean;
   errorMessage: string | null; // null if success is true
 };
 
-export const signInWithApple = async (): Promise<SignInResult> => {
+const signInWithApple = async (): Promise<SignInResult> => {
   try {
     await _signInWithApple();
     return {
@@ -36,7 +41,7 @@ export const signInWithApple = async (): Promise<SignInResult> => {
   }
 };
 
-export const authenticateWithCode = async () => {
+const authenticateWithCode = async () => {
   const authenticationCode = getQueryParam("code");
   if (typeof authenticationCode !== "string") {
     return;
@@ -46,3 +51,8 @@ export const authenticateWithCode = async () => {
     code: authenticationCode
   });
 };
+
+export const authRepositoryState = cachedAtom<AuthRepository>({
+  key: "atom-authRepository",
+  default: { onAuthStateChanged, signInWithApple, authenticateWithCode }
+});
