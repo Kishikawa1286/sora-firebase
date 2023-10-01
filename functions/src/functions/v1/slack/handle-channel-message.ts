@@ -21,6 +21,7 @@ import {
   GroupsMessageEvent
 } from "../../../utils/slack/types/message-events";
 import { handleSlackFiles } from "./handle-files";
+import { handleScheduleAdjustment } from "./handle-schedule-adjustment";
 
 export const handleChannelMessage = async (
   accessToken: string,
@@ -69,6 +70,14 @@ export const handleChannelMessage = async (
     channel: channel,
     threadTimestamp: timestamp,
     reactionName: "dog"
+  });
+
+  const { isScheduleAdjustment, botMessage } = await handleScheduleAdjustment({
+    verifiedUsers,
+    text,
+    accessToken,
+    channel,
+    threadTimestamp: threadTimestamp ?? timestamp
   });
 
   const { imageUrls, nonImageFiles } = await handleSlackFiles({
@@ -138,13 +147,6 @@ export const handleChannelMessage = async (
     throw new Error("Failed to summarize");
   }
 
-  await addSlackReaction({
-    accessToken,
-    channel: channel,
-    threadTimestamp: timestamp,
-    reactionName: "dog"
-  });
-
   await Promise.all(
     // For all mentioned verified users
     verifiedUsers.map(async (user) => {
@@ -166,13 +168,14 @@ export const handleChannelMessage = async (
         userId,
         message: text,
         summary,
-        botMessage: "",
+        botMessage,
         senderId: slackSender.sender_id,
         senderName: senderSlackName,
         senderIconUrl: senderSlackIconUrl,
         slackTeamId: teamId,
         imageUrls,
         nonImageFileNames: nonImageFiles.map((file) => file.name),
+        isScheduleAdjustment,
         slackTeamDomain,
         slackTeamIconUrl,
         slackTeamName,

@@ -1,8 +1,8 @@
 import { Alert, Box, Button, Card, Container, Typography } from "@mui/material";
 import React from "react";
 import { AppleLoginButton } from "react-social-login-buttons";
-import { APP_DYNAMIC_LINK } from "../utils/env";
-import { useAuthenticationPageViewModel } from "./states";
+import { APP_DYNAMIC_LINK } from "../../utils/env";
+import { useAuthenticationPageViewModel } from "./view-model";
 
 const AuthenticationPage: React.FC<object> = () => {
   const viewModel = useAuthenticationPageViewModel();
@@ -28,7 +28,7 @@ const AuthenticationPage: React.FC<object> = () => {
           justifyContent="center" // 縦方向の中央寄せ
           padding={4}
         >
-          {viewModel.state.authenticated ? (
+          {viewModel.model.authenticated ? (
             <div>
               <Typography variant="body1" gutterBottom>
                 認証が完了しました！
@@ -53,9 +53,9 @@ const AuthenticationPage: React.FC<object> = () => {
                 onClick={viewModel.actions.signInWithApple}
                 style={{ marginTop: 20 }}
               />
-              {viewModel.state.errorMessage && (
+              {viewModel.model.errorMessage && (
                 <Alert severity="error" style={{ marginTop: 16 }}>
-                  {viewModel.state.errorMessage}
+                  {viewModel.model.errorMessage}
                 </Alert>
               )}
             </div>

@@ -15,7 +15,7 @@ const examples = [
 export const generatePositiveChatReply = (
   message: string,
   params?: CompletionCreateParams
-) =>
+): Promise<string | null> =>
   singleCompletion({
     userMessage: message,
     systemMessage,

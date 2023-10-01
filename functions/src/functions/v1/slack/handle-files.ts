@@ -1,5 +1,6 @@
 import {
   downloadUrl,
+  messageImagePath,
   saveImage
 } from "../../../utils/firebase-storage/save-image";
 import { randomString } from "../../../utils/random-string";
@@ -28,7 +29,7 @@ export const handleSlackFiles = async ({
   const imageFileDataArray = imageBuffers.map((buffer) => {
     return {
       buffer,
-      imagePath: `${randomString(64)}.jpeg`,
+      imagePath: messageImagePath(`${randomString(64)}.jpeg`),
       contentType: "image/jpeg"
     };
   });
