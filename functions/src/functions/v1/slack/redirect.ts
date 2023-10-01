@@ -63,8 +63,8 @@ export const slackRedirect = functions128MB.https.onRequest(
       }
       await Promise.all(
         channels.map(async (channel) => {
-          const { id: channelId } = channel;
-          if (!channelId) {
+          const { id: channelId, is_archived: isArchived } = channel;
+          if (!channelId || isArchived) {
             return;
           }
           await joinConversation(accessToken, channelId);
