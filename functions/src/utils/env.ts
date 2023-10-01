@@ -7,4 +7,5 @@ export const LINE_CHANNEL_ACCESS_TOKEN =
 export const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET ?? "";
 
 // .env.*
-export const FIREBASE_HOSTING_URL = process.env.FIREBASE_HOSTING_URL ?? "";
+// We cannot use FIREBASE_ prefix because it is reserved by Firebase
+export const FIREBASE_HOSTING_URL = process.env.FB_HOSTING_URL ?? "";
