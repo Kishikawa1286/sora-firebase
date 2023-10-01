@@ -1,5 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { firestore } from "../admin";
+import { deleteAllSubcollections } from "./delete-all-subcollections";
 
 const userCollection = "users_v1";
 export const userDocument = (id: string) => `${userCollection}/${id}`;
@@ -117,15 +118,7 @@ export const setUserScheduleAdjustmentUrl = async ({
 
 export const deleteUser = async (id: string) => {
   const userDocRef = firestore.doc(userDocument(id));
-
-  // Delete all subcollections of the user document
-  const collections = await userDocRef.listCollections();
-  const deletePromises = collections.map(async (collection) => {
-    const docs = await collection.listDocuments();
-    return Promise.all(docs.map((doc) => doc.delete()));
-  });
-  await Promise.all(deletePromises);
-
+  await deleteAllSubcollections(userDocRef);
   await userDocRef.delete();
 };
 
