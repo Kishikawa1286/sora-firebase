@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { RecoilState, atom as _atom, selector } from "recoil";
+import { RecoilState, atom, selector } from "recoil";
 
 const recoilCache: Record<string, RecoilState<any>> = {};
 
@@ -11,7 +11,7 @@ export const cachedAtom = <T>({
   default: T;
 }): RecoilState<T> => {
   if (!recoilCache[key]) {
-    recoilCache[key] = _atom({
+    recoilCache[key] = atom({
       key,
       default: defaultValue
     });
@@ -21,7 +21,7 @@ export const cachedAtom = <T>({
 };
 
 export const cachedSelector = <T>({
-  atom,
+  atom: atomState,
   selectorKey
 }: {
   atom: RecoilState<T>;
@@ -30,8 +30,8 @@ export const cachedSelector = <T>({
   if (!recoilCache[selectorKey]) {
     recoilCache[selectorKey] = selector({
       key: selectorKey,
-      get: ({ get }) => get(atom),
-      set: ({ set }, value) => set(atom, value)
+      get: ({ get }) => get(atomState),
+      set: ({ set }, value) => set(atomState, value)
     });
   }
 

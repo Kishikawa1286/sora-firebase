@@ -1,17 +1,14 @@
 import { useEffect } from "react";
-import { useRecoilValue } from "recoil";
-import { authRepositoryState } from "../../repositories/auth-repository/auth-repository";
+import { useAuthRepository } from "../../repositories/auth/repository";
+import { useModel } from "../../utils/templates/model";
 import { ViewModel } from "../../utils/templates/view-model";
-import { AuthenticationPageModel, useAuthenticationPageModel } from "./model";
+import { AuthenticationPageModel } from "./model";
 
 export const useAuthenticationPageViewModel =
   (): ViewModel<AuthenticationPageModel> => {
-    const authRepository = useRecoilValue(authRepositoryState);
-    if (!authRepository) {
-      throw new Error("AuthRepository has not been initialized.");
-    }
+    const authRepository = useAuthRepository();
 
-    const { model, setterOf } = useAuthenticationPageModel({
+    const { model, setterOf } = useModel<AuthenticationPageModel>({
       name: "authenticationPage",
       default: {
         authenticated: false,

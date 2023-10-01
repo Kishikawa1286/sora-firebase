@@ -1,23 +1,18 @@
 import { FirebaseError } from "@firebase/util";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
   signInWithApple as _signInWithApple,
   onAuthStateChanged
 } from "../../helpers/firebase-auth-helper";
 import { callFirebaseFunction } from "../../helpers/firebase-functions-helper";
 import { getQueryParam } from "../../helpers/query-param-helper";
-import { cachedAtom } from "../../utils/templates/cached-recoil";
-import { handleSigninError } from "./error-message";
-
-export type AuthRepository = {
-  onAuthStateChanged: typeof onAuthStateChanged;
-  signInWithApple: typeof signInWithApple;
-  authenticateWithCode: typeof authenticateWithCode;
-};
-
-type SignInResult = {
-  success: boolean;
-  errorMessage: string | null; // null if success is true
-};
+import {
+  cachedAtom,
+  cachedSelector
+} from "../../utils/templates/cached-recoil";
+import { handleSigninError } from "./internal/error-message";
+import { AuthRepositoryBase } from "./repository-base";
+import { SignInResult } from "./types/sign-in-result";
 
 const signInWithApple = async (): Promise<SignInResult> => {
   try {
@@ -52,7 +47,20 @@ const authenticateWithCode = async () => {
   });
 };
 
-export const authRepositoryState = cachedAtom<AuthRepository>({
+const authRepository = cachedAtom<AuthRepositoryBase>({
   key: "atom-authRepository",
   default: { onAuthStateChanged, signInWithApple, authenticateWithCode }
 });
+
+export const useAuthRepository = (): AuthRepositoryBase =>
+  useRecoilValue(authRepository);
+
+// This function is used for testing.
+export const useAuthRepositoryOverrider = (value: AuthRepositoryBase) => {
+  const authRepositorySelector = cachedSelector({
+    atom: authRepository,
+    selectorKey: "selector-authRepository"
+  });
+  const [, setAuthRepository] = useRecoilState(authRepositorySelector);
+  setAuthRepository(value);
+};

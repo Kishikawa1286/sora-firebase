@@ -20,16 +20,19 @@ export const useModel = <T extends Record<string, any>>({
     const atomKey = `atom-${name}-${key}`;
     const selectorKey = `selector-${name}-${key}`;
 
+    // If you specify the same key,
+    // the same atom/selector will be returned.
     const atom = cachedAtom({
       key: atomKey,
       default: defaultValue
     });
-
     const selector = cachedSelector({
       atom,
       selectorKey
     });
 
+    // This function is called only in definition of view-model
+    // that is called in React component.
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, setValue] = useRecoilState(selector);
 
